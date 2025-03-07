@@ -1,7 +1,6 @@
 # CS5520-Final Project
 ## Team Members 
-Carlos Semeho Edorh 
-Yiyang Wang 
+Carlos Semeho Edorh, Yiyang Wang 
 ## App Name 
 Local Buzz 
 ## App Description 
