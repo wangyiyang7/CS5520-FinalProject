@@ -1,8 +1,10 @@
+
 import { Tabs, useRouter } from "expo-router";
 import React from "react";
 import { Platform } from "react-native";
 
 import { HapticTab } from "@/components/HapticTab";
+
 import TabBarBackground from "@/components/ui/TabBarBackground";
 import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
@@ -11,6 +13,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 
 import { AuthContext } from "@/components/AuthContext";
 import { useContext } from "react";
+
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -21,7 +24,9 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
+
         headerShown: true,
+
         tabBarButton: HapticTab,
         tabBarBackground: TabBarBackground,
         tabBarStyle: Platform.select({
@@ -31,7 +36,9 @@ export default function TabLayout() {
           },
           default: {},
         }),
+
         headerRight: () => <Profile />,
+
       }}
     >
       <Tabs.Screen
@@ -44,20 +51,24 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+
         name="map"
         options={{
           title: "Map",
           tabBarIcon: ({ color }) => (
             <MaterialIcons color={color} size={24} name="map" />
+
           ),
         }}
       />
       <Tabs.Screen
+
         name="post"
         options={{
           title: "Create",
           tabBarIcon: ({ color }) => (
             <MaterialIcons color={color} size={24} name="add-circle-outline" />
+
           ),
         }}
         listeners={() => ({
