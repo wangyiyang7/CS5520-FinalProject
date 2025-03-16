@@ -13,11 +13,17 @@ import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { initializeDatabase } from '../../Firebase/services/DatabaseService';
 
+import { useRouter } from "expo-router";
+
+
+
 export function PublicPostsList() {
     const [posts, setPosts] = useState<PublicPost[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const colorScheme = useColorScheme() ?? 'light';
+
+    const router = useRouter();
 
     const loadPosts = async () => {
         setLoading(true);
@@ -42,9 +48,18 @@ export function PublicPostsList() {
         loadPosts();
     }, []);
 
+
     const handlePostPress = (post: PublicPost) => {
         console.log('Post pressed:', post.id);
+
+        // Navigate to the post detail screen
+        router.push({
+            pathname: "/post/[id]",
+            params: { id: post.id }
+        });
+
     };
+
 
     if (loading && !refreshing) {
         return (
