@@ -1,12 +1,24 @@
+/**
+ * Main home screen component accessible to both guest and authenticated users.
+ * Integrates the content header and public posts list components.
+ */
+
 import { StyleSheet, View, Text } from "react-native";
 import MyWeather from "@/components/MyWeather";
+import { PublicContentHeader } from "@/components/public/PublicContentHeader";
+import { PublicPostsList } from "@/components/public/PublicPostsList";
 
 export default function HomeScreen() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Home Screen</Text>
-      <Text style={styles.subtitle}>Public content available to all users</Text>
-      <MyWeather />
+      {/* <Text style={styles.title}>Home Screen</Text>
+      <Text style={styles.subtitle}>Public content available to all users</Text> */}
+      {/* This has been integrated into the PublicPostsList component Now */}
+      {/* <MyWeather /> */}
+
+      <PublicContentHeader />
+      <PublicPostsList />
+
     </View>
   );
 }
