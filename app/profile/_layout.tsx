@@ -1,23 +1,26 @@
 import { Stack } from "expo-router";
-import { useEffect } from "react";
+import { useContext, useEffect } from "react";
 import { useRouter } from "expo-router";
-// import { useAuth } from "../../context/AuthContext";
+import Logout from "@/components/Logout";
+import { AuthContext } from "@/components/AuthContext";
 
 export default function ProfileLayout() {
   // const { isLoggedIn } = useAuth();
   const router = useRouter();
-  /*
+  const { currentUser } = useContext(AuthContext);
+
   useEffect(() => {
-    if (!isLoggedIn()) {
-      router.replace("/auth-redirect?target=/profile");
+    if (!currentUser) {
+      router.replace("/(tabs)");
     }
-  }, [isLoggedIn]);
-*/
+  }, [currentUser]);
+
   return (
     <Stack
       screenOptions={{
         headerTitle: "Profile",
         headerBackTitle: "Back",
+        headerRight: () => <Logout />,
       }}
     />
   );

@@ -25,7 +25,7 @@ export default function MyLocation() {
       return;
     }
 
-    let location = await Location.getCurrentPositionAsync({});
+    let location = await Location.getCurrentPositionAsync();
     return location;
   }
 
@@ -35,15 +35,16 @@ export default function MyLocation() {
         const myLocation = await getCurrentLocation();
 
         if (myLocation) {
-          // console.log(myLocation);
+          console.log(myLocation);
           const { latitude, longitude } = myLocation.coords;
           const city = await Location.reverseGeocodeAsync({
             latitude,
             longitude,
           });
-          if (city) {
+          console.log(longitude, latitude);
+          /*if (city) {
             setLocation(JSON.stringify(city[0]["city"]).replace(/"/g, ""));
-          }
+          }*/
           const params = {
             // Vancouver
             //latitude: 49.28273,
@@ -57,7 +58,6 @@ export default function MyLocation() {
           const url = "https://api.open-meteo.com/v1/forecast";
           const responses = await fetchWeatherApi(url, params);
 
-          // Process first location. Add a for-loop for multiple locations or weather models
           const response = responses[0];
           const current = response.current()!;
 
@@ -75,11 +75,14 @@ export default function MyLocation() {
             weatherDict[weatherCode.toString()][isDaytime ? "day" : "night"]
           );
           setWeather(weatherData);
+
+          console.log(weatherData);
         }
       } catch (e) {
         setErrorMsg("");
       }
     }
+
     getWeather();
   }, []);
 

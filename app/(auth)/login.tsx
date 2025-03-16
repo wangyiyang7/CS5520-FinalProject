@@ -8,9 +8,15 @@ import {
   Platform,
 } from "react-native";
 import { useState } from "react";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import {
+  RelativePathString,
+  useLocalSearchParams,
+  useRouter,
+  useSegments,
+} from "expo-router";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/Firebase/firebaseSetup";
+import { useRoute } from "@react-navigation/native";
 
 export default function login() {
   const [email, setEmail] = useState("");
@@ -28,6 +34,7 @@ export default function login() {
         // Signed in
         const user = userCredential.user;
         // ...
+        router.replace("/(tabs)");
       })
       .catch((error) => {
         const errorCode = error.code;
