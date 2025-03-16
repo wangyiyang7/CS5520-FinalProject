@@ -12,6 +12,7 @@ import "react-native-reanimated";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { AuthProvider } from "@/components/AuthContext";
+import { initializeDatabase } from "@/Firebase/services/DatabaseService";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -28,9 +29,22 @@ export default function RootLayout() {
     }
   }, [loaded]);
 
+
+  // Initialize database when app starts, Do this if only the database is empty and 
+  // comment out the code after the database is initialized
+  // useEffect(() => {
+  //   initializeDatabase();
+  // }, []);
+
+
+
+
+
   if (!loaded) {
     return null;
   }
+
+
 
   return (
     <AuthProvider>
