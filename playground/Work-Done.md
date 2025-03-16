@@ -14,3 +14,11 @@
 7. refactor HomeScreen component to integrate PublicContentHeader and PublicPostsList,
    Commented/Moved unused elements to (<MyWeather />)
 
+
+# Work Updates for branch (post-details-page) Carlos
+
+1. Create the Dynamic Route File
+Created a new file called `app/post/[id].tsx`. This creates a dynamic route where `[id]` will be replaced with the actual post ID in the URL, allowing for individual post viewing.
+
+2. Modify Post Card Navigation
+Updated the `handlePostPress` function in `PublicPostsList.tsx` to navigate to the detail view when a post is tapped, using Expo Router's navigation with the post ID as a parameter.
