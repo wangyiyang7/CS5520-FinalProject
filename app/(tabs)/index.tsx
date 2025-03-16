@@ -18,7 +18,6 @@ export default function HomeScreen() {
 
       <PublicContentHeader />
       <PublicPostsList />
-
     </View>
   );
 }
