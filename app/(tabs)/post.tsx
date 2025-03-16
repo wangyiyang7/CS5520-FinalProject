@@ -1,15 +1,18 @@
 import { Image, StyleSheet, Platform, View, Text } from "react-native";
 import { AuthContext } from "@/components/AuthContext";
 import { useContext } from "react";
-import { useRouter } from "expo-router";
+import { useRouter, useSegments } from "expo-router";
 
 export default function Post() {
   const router = useRouter();
   const { currentUser } = useContext(AuthContext);
+  //const segments = useSegments();
+  //console.log(segments);
+  /*
   if (!currentUser) {
     router.push("/(auth)/login");
   }
-
+*/
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Post Screen</Text>

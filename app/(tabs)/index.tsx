@@ -5,8 +5,8 @@ export default function HomeScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Home Screen</Text>
-      <Text style={styles.subtitle}>Public content available to all users</Text>
       <MyWeather />
+      <Text style={styles.subtitle}>Public content available to all users</Text>
     </View>
   );
 }
