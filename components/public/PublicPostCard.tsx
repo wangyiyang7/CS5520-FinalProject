@@ -24,7 +24,7 @@ const formatDate = (date: Date): string => {
 };
 
 // Component for category badges
-const CategoryBadge = ({ category }: { category: string }) => {
+export const CategoryBadge = ({ category }: { category: string }) => {
     const colorScheme = useColorScheme() ?? 'light';
     const colors: Record<string, { bg: string, text: string }> = {
         'Traffic': { bg: '#FFF4E5', text: '#FF9500' },
