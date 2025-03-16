@@ -1,21 +1,17 @@
+import { Image, StyleSheet, Platform, View, Text } from "react-native";
 
-// app/(tabs)/map.tsx
-import { View, Text, StyleSheet } from "react-native";
-
-export default function Map() {
+export default function ProfileScreen() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Map Screen</Text>
+      <Text style={styles.title}>Profile Screen</Text>
       <Text style={styles.subtitle}>
-        Public map content available to all users
+        Protected content available to logged in users
       </Text>
     </View>
-
   );
 }
 
 const styles = StyleSheet.create({
-
   container: {
     flex: 1,
     justifyContent: "center",
@@ -30,6 +26,5 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 16,
     color: "#666",
-
   },
 });

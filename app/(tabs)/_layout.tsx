@@ -1,23 +1,32 @@
-import { Tabs } from "expo-router";
+
+import { Tabs, useRouter } from "expo-router";
 import React from "react";
 import { Platform } from "react-native";
 
 import { HapticTab } from "@/components/HapticTab";
-import { IconSymbol } from "@/components/ui/IconSymbol";
+
 import TabBarBackground from "@/components/ui/TabBarBackground";
 import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
+import Profile from "@/components/Profile";
+import { MaterialIcons } from "@expo/vector-icons";
 
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { AuthContext } from "@/components/AuthContext";
+import { useContext } from "react";
+
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const router = useRouter();
+  const { currentUser } = useContext(AuthContext);
 
   return (
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
-        headerShown: false,
+
+        headerShown: true,
+
         tabBarButton: HapticTab,
         tabBarBackground: TabBarBackground,
         tabBarStyle: Platform.select({
@@ -27,6 +36,9 @@ export default function TabLayout() {
           },
           default: {},
         }),
+
+        headerRight: () => <Profile />,
+
       }}
     >
       <Tabs.Screen
@@ -39,22 +51,34 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="create"
-        options={{
-          title: "Create",
-          tabBarIcon: ({ color }) => (
-            <MaterialIcons color={color} size={24} name="add-circle-outline" />
-          ),
-        }}
-      />
-      <Tabs.Screen
+
         name="map"
         options={{
           title: "Map",
           tabBarIcon: ({ color }) => (
             <MaterialIcons color={color} size={24} name="map" />
+
           ),
         }}
+      />
+      <Tabs.Screen
+
+        name="post"
+        options={{
+          title: "Create",
+          tabBarIcon: ({ color }) => (
+            <MaterialIcons color={color} size={24} name="add-circle-outline" />
+
+          ),
+        }}
+        listeners={() => ({
+          tabPress: (e) => {
+            if (!currentUser) {
+              e.preventDefault();
+              router.push("/(auth)/login");
+            }
+          },
+        })}
       />
     </Tabs>
   );

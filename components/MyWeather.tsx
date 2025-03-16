@@ -16,6 +16,7 @@ export default function MyLocation() {
   const [weatherInfo, setWeather] = useState<Weather>();
   const isDaytime = new Date().getHours() >= 6 && new Date().getHours() < 18;
   const [weatherDesc, setWeatherDesc] = useState<WeatherDescription>();
+  const [location, setLocation] = useState("unknown");
 
   async function getCurrentLocation() {
     let { status } = await Location.requestForegroundPermissionsAsync();
@@ -36,13 +37,20 @@ export default function MyLocation() {
         if (myLocation) {
           // console.log(myLocation);
           const { latitude, longitude } = myLocation.coords;
+          const city = await Location.reverseGeocodeAsync({
+            latitude,
+            longitude,
+          });
+          if (city) {
+            setLocation(JSON.stringify(city[0]["city"]).replace(/"/g, ""));
+          }
           const params = {
             // Vancouver
-            latitude: 49.28273,
-            longitude: -123.120735,
+            //latitude: 49.28273,
+            //longitude: -123.120735,
 
-            //latitude: latitude,
-            //longitude: longitude,
+            latitude: latitude,
+            longitude: longitude,
 
             current: ["temperature_2m", "precipitation", "weather_code"],
           };
@@ -85,13 +93,16 @@ export default function MyLocation() {
       {errorMsg && <Text style={styles.paragraph}>{text}</Text>}
 
       {weatherInfo && (
-        <View>
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
           <Image
             source={{ uri: weatherDesc?.image }}
             style={styles.weatherImage}
           />
-          <Text>Weather: {weatherDesc?.description}</Text>
-          <Text>Temperature: {weatherInfo.temperature.toFixed(0)}°C</Text>
+          <View style={{ flexDirection: "column" }}>
+            <Text>{location}</Text>
+            <Text>Weather: {weatherDesc?.description}</Text>
+            <Text>Temperature: {weatherInfo.temperature.toFixed(0)}°C</Text>
+          </View>
         </View>
       )}
     </View>
@@ -113,6 +124,7 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderWidth: 1,
-    backgroundColor: "lightgrey",
+    backgroundColor: "white",
+    marginRight: 10,
   },
 });
