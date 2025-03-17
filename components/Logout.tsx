@@ -18,7 +18,7 @@ export default function Logout() {
   };
 
   return (
-    <TouchableOpacity style={{ marginRight: 15 }} onPress={handlePress}>
+    <TouchableOpacity style={{ marginRight: 15 }} onPressIn={handlePress}>
       <Ionicons name="log-out" size={24} color="black" />
     </TouchableOpacity>
   );
