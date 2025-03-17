@@ -30,7 +30,7 @@ export default function ProfileScreen() {
           <Text>{userInfo?.id}</Text>
           <Text>{userInfo?.username}</Text>
           <Text>{userInfo?.email}</Text>
-          <Text>{userInfo?.createdAt.toDate().toLocaleDateString()};</Text>
+          <Text>{userInfo?.createdAt.toDate().toLocaleDateString()}</Text>
           <Text>{userInfo?.lastLogin[0].toDate().toLocaleString()}</Text>
           <Text>{userInfo?.photoURL}</Text>
         </View>
