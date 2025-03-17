@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { useRouter } from "expo-router";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/Firebase/firebaseSetup";
+import { createUserProfile } from "@/Firebase/services/UserService";
 
 const signup = () => {
   const [username, setUsername] = useState("");
@@ -15,20 +16,22 @@ const signup = () => {
     console.log("Username:", username);
     console.log("Email:", email);
     console.log("Password:", password);
-    await createUserWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        // Signed up
-        const user = userCredential.user;
-        //console.log(user);
-        // ...
-        router.replace("/(tabs)");
-      })
-      .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        console.log(errorCode, errorMessage);
-        // ..
-      });
+    try {
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const user = userCredential.user;
+      console.log(user.uid);
+      const newUser = await createUserProfile(user.uid, email, username);
+
+      router.replace("/(tabs)");
+    } catch (error) {
+      const errorCode = (error as any).code;
+      const errorMessage = (error as any).message;
+      console.log(errorCode, errorMessage);
+    }
   };
 
   return (
