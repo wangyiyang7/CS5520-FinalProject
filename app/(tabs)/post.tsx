@@ -112,7 +112,7 @@ export default function PostScreen() {
     }
   };
 
-  // Function to upload image to Firebase Storage
+  // Function to upload image to Firebase Storage, Currently not being used because of storage billing issues.
   const uploadImage = async (uri: string): Promise<string> => {
     const response = await fetch(uri);
     const blob = await response.blob();
