@@ -54,7 +54,7 @@ export default function ProfileScreen() {
     setIsModalVisible(false);
   };
 
-  const handleEditProfilePicture = () => {};
+  const handleEditProfilePicture = () => { };
   const handleChangePassword = () => {
     setIsChangePasswordVisible(true);
   };
@@ -78,8 +78,8 @@ export default function ProfileScreen() {
               uri: userInfo.photoURL
                 ? userInfo.photoURL
                 : Image.resolveAssetSource(
-                    require("@/assets/images/profile.jpg")
-                  ).uri,
+                  require("@/assets/images/profile.jpg")
+                ).uri,
             }}
             style={styles.profileImage}
           />
@@ -115,7 +115,7 @@ export default function ProfileScreen() {
           />
         </View>
         <View style={styles.button}>
-          <Button title="My Posts" onPress={() => {}} />
+          <Button title="My Posts" onPress={() => { }} />
         </View>
       </View>
       {userInfo && (

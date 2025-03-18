@@ -2,7 +2,7 @@
  * Component that displays a list of public posts with integrated weather information.
  * Fixed to show multiple posts with weather fixed at top and proper background styling.
  */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { FlatList, StyleSheet, View, ActivityIndicator, RefreshControl, SafeAreaView, Button, Alert } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
@@ -13,7 +13,7 @@ import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { initializeDatabase } from '../../Firebase/services/DatabaseService';
 
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 
 
 
@@ -47,6 +47,18 @@ export function PublicPostsList() {
     useEffect(() => {
         loadPosts();
     }, []);
+
+
+    useFocusEffect(
+        useCallback(() => {
+            console.log('Home screen focused - refreshing posts');
+            loadPosts();
+            return () => {
+                // This runs when screen is unfocused
+                console.log('Home screen unfocused');
+            };
+        }, [])
+    );
 
 
     const handlePostPress = (post: PublicPost) => {

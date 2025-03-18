@@ -9,8 +9,6 @@ Local Buzz
 Stay instantly informed about what's happening right around you with Local Buzz! This hyperlocal community bulletin board app connects you with real-time events and incidents in your neighborhood. From traffic snarls and road closures to local festivals and community gatherings, Local Buzz keeps you in the loop. Share updates, photos, and alerts with your neighbors, fostering a stronger, more informed community. Our AI-powered categorization ensures you see the most relevant information quickly, and customizable notifications keep you informed without overwhelming you. Experience the power of real-time local connection – download Local Buzz today! 
 
 
-
-
 `----------------------------------------------------------------`
 # Work Updates for branch (public-content-for-guess-users) Carlos
 `----------------------------------------------------------------`
@@ -38,4 +36,28 @@ Updated the `handlePostPress` function in `PublicPostsList.tsx` to navigate to t
 
 <!-- Overlapping on Team Existing Changes/Updates -->
 # None
+
+
+`--------------------------------------------------`
+# Work Updates for branch (create-new-post)
+`--------------------------------------------------`
+
+1. Implement Post Creation Form
+   Created a comprehensive post creation form with fields for title, content, and category selection, along with camera integration for photos and automatic location capture.
+
+   <!-- Please Note -->
+
+`I am skipping the image URI link during the post creation because of firestore billing issues i am trying to recolve`
+
+
+2. Add Form Validation and Error Handling
+   Implemented proper validation for form fields and error handling for post creation, ensuring users receive clear feedback during the submission process.
+
+3. Configure Post Creation in Firebase
+   Set up the connection to Firestore for saving new posts with proper data structure, allowing authenticated users to contribute content to the community feed.
+
+4. Implemented Auto-Refresh on Navigation
+   Added functionality to automatically refresh the posts list when navigating back from post creation, ensuring newly created content appears immediately.
+
+
 
