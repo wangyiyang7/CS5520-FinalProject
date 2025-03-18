@@ -10,16 +10,16 @@ import {
   updateDocument,
   setDocument,
   processDocumentData,
-} from '@/Firebase/firestoreHelper';
-
+} from "@/Firebase/firestoreHelper";
+import { Timestamp } from "firebase/firestore";
 // User profile interface
 export interface UserProfile {
   id: string;
   username: string;
   email: string;
   photoURL?: string;
-  createdAt: Date;
-  lastLogin: Date;
+  createdAt: Timestamp;
+  lastLogin: Timestamp[];
   notificationPreferences: {
     categories: string[];
     radius: number;
@@ -34,15 +34,15 @@ export const createUserProfile = async (
   username?: string
 ): Promise<boolean> => {
   try {
-    const now = new Date();
+    const now = Timestamp.now();
 
     const userData = {
-      username: username || email.split('@')[0], // Default username from email if not provided
+      username: username || email.split("@")[0], // Default username from email if not provided
       email,
       createdAt: now,
-      lastLogin: now,
+      lastLogin: [now, now],
       notificationPreferences: {
-        categories: ['Traffic', 'Safety', 'Event', 'Infrastructure'],
+        categories: ["Traffic", "Safety", "Event", "Infrastructure"],
         radius: 5, // Default 5km/mi radius
         notifyOnAll: false,
       },
@@ -51,7 +51,7 @@ export const createUserProfile = async (
     // Use setDocument to create with a specific ID (the auth user ID)
     return await setDocument(COLLECTIONS.USERS, userId, userData, false);
   } catch (error) {
-    console.error('Error creating user profile:', error);
+    console.error("Error creating user profile:", error);
     return false;
   }
 };
@@ -65,14 +65,14 @@ export const getUserProfile = async (
     if (!doc) return null;
 
     const processedData = processDocumentData(doc);
-
+    console.log(processedData.lastLogin);
     return {
       id: doc.id,
-      username: processedData.username || '',
-      email: processedData.email || '',
+      username: processedData.username || "",
+      email: processedData.email || "",
       photoURL: processedData.photoURL,
-      createdAt: processedData.createdAt,
-      lastLogin: processedData.lastLogin,
+      createdAt: doc.createdAt,
+      lastLogin: doc.lastLogin,
       notificationPreferences: processedData.notificationPreferences || {
         categories: [],
         radius: 5,
@@ -80,7 +80,7 @@ export const getUserProfile = async (
       },
     };
   } catch (error) {
-    console.error('Error getting user profile:', error);
+    console.error("Error getting user profile:", error);
     return null;
   }
 };
@@ -91,12 +91,12 @@ export const updateUserProfile = async (
   updates: Partial<UserProfile>
 ): Promise<boolean> => {
   try {
-    // Don't allow updating id, email, or createdAt
-    const { id, email, createdAt, ...validUpdates } = updates;
+    // only allow update username,and lastLogin
+    const { ...validUpdates } = updates;
 
     return await updateDocument(COLLECTIONS.USERS, userId, validUpdates);
   } catch (error) {
-    console.error('Error updating user profile:', error);
+    console.error("Error updating user profile:", error);
     return false;
   }
 };
@@ -104,7 +104,7 @@ export const updateUserProfile = async (
 // Update user's notification preferences
 export const updateNotificationPreferences = async (
   userId: string,
-  preferences: Partial<UserProfile['notificationPreferences']>
+  preferences: Partial<UserProfile["notificationPreferences"]>
 ): Promise<boolean> => {
   try {
     // Get the current user profile
@@ -122,7 +122,7 @@ export const updateNotificationPreferences = async (
       notificationPreferences: updatedPreferences,
     });
   } catch (error) {
-    console.error('Error updating notification preferences:', error);
+    console.error("Error updating notification preferences:", error);
     return false;
   }
 };
@@ -134,7 +134,7 @@ export const updateLastLogin = async (userId: string): Promise<boolean> => {
       lastLogin: new Date(),
     });
   } catch (error) {
-    console.error('Error updating last login:', error);
+    console.error("Error updating last login:", error);
     return false;
   }
 };
@@ -145,7 +145,7 @@ export const checkUserExists = async (userId: string): Promise<boolean> => {
     const user = await getDocument(COLLECTIONS.USERS, userId);
     return !!user;
   } catch (error) {
-    console.error('Error checking if user exists:', error);
+    console.error("Error checking if user exists:", error);
     return false;
   }
 };
@@ -167,7 +167,7 @@ export const createOrUpdateUser = async (
       return await createUserProfile(userId, email, username);
     }
   } catch (error) {
-    console.error('Error creating or updating user:', error);
+    console.error("Error creating or updating user:", error);
     return false;
   }
 };

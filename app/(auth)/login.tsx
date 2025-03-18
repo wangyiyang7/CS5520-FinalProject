@@ -17,30 +17,52 @@ import {
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/Firebase/firebaseSetup";
 import { useRoute } from "@react-navigation/native";
+import { FirebaseError } from "@firebase/util";
+import { getDocument, updateDocument } from "@/Firebase/firestoreHelper";
+import { Timestamp } from "firebase/firestore";
 
 export default function login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
+  const [error, setError] = useState("");
   const router = useRouter();
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     // Handle login logic here
     console.log("Email:", email);
     console.log("Password:", password);
+    try {
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
 
-    signInWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        // Signed in
-        const user = userCredential.user;
-        // ...
-        router.replace("/(tabs)");
-      })
-      .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        setErrorMessage(error.message);
-      });
+      if (userCredential) {
+        router.push("/(tabs)/post");
+        const userDoc = await getDocument("users", userCredential.user.uid);
+
+        if (userDoc) {
+          // Extract the lastLogin array
+          const lastLoginArray = userDoc.lastLogin;
+
+          if (lastLoginArray && lastLoginArray.length === 2) {
+            // Create a new array with the second element of lastLoginArray as the first element
+            // and Timestamp.now() as the second element
+            const newArray = [lastLoginArray[1], Timestamp.now()];
+            console.log(newArray);
+            // Update the user document with the new array
+            const success = updateDocument("users", userCredential.user.uid, {
+              lastLogin: newArray,
+            });
+          }
+        }
+      }
+    } catch (error) {
+      if (error instanceof FirebaseError) {
+        setError(error.message);
+      }
+    }
   };
 
   return (
@@ -50,7 +72,7 @@ export default function login() {
     >
       <Text style={styles.title}>Login</Text>
 
-      {errorMessage ? <Text style={styles.error}>{errorMessage}</Text> : null}
+      {error ? <Text style={styles.error}>{error}</Text> : null}
 
       <TextInput
         style={styles.input}
