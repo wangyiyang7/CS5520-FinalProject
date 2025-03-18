@@ -45,6 +45,11 @@ Updated the `handlePostPress` function in `PublicPostsList.tsx` to navigate to t
 1. Implement Post Creation Form
    Created a comprehensive post creation form with fields for title, content, and category selection, along with camera integration for photos and automatic location capture.
 
+   <!-- Please Note -->
+
+`I am skipping the image URI link during the post creation because of firestore billing issues i am trying to recolve`
+
+
 2. Add Form Validation and Error Handling
    Implemented proper validation for form fields and error handling for post creation, ensuring users receive clear feedback during the submission process.
 
@@ -53,9 +58,6 @@ Updated the `handlePostPress` function in `PublicPostsList.tsx` to navigate to t
 
 4. Implemented Auto-Refresh on Navigation
    Added functionality to automatically refresh the posts list when navigating back from post creation, ensuring newly created content appears immediately.
-   
-<!-- Please Note -->
 
-`I am skipping the image URI link during the post saving because of firestore billing issues i am trying to recolve`
 
 
