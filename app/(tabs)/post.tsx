@@ -1,42 +1,393 @@
-import { Image, StyleSheet, Platform, View, Text } from "react-native";
-import { AuthContext } from "@/components/AuthContext";
-import { useContext } from "react";
-import { useRouter, useSegments } from "expo-router";
+/**
+ * Post creation screen that allows authenticated users to create new community posts.
+ * Includes form fields for title, content, category selection, location capture, and photo upload.
+ */
 
-export default function Post() {
+import React, { useState, useEffect, useContext } from "react";
+import {
+  StyleSheet,
+  View,
+  TextInput,
+  TouchableOpacity,
+  Text,
+  ScrollView,
+  ActivityIndicator,
+  Alert,
+  Image,
+  KeyboardAvoidingView,
+  Platform
+} from "react-native";
+import { Picker } from "@react-native-picker/picker";
+import { AuthContext } from "@/components/AuthContext";
+import { useRouter } from "expo-router";
+import { createPost } from "@/Firebase/services/PostService";
+import * as ImagePicker from 'expo-image-picker';
+import * as Location from 'expo-location';
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { Colors } from "@/constants/Colors";
+import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
+import { ImageManipulator } from "expo-image-manipulator";
+
+export default function PostScreen() {
   const router = useRouter();
   const { currentUser } = useContext(AuthContext);
-  //const segments = useSegments();
-  //console.log(segments);
-  /*
-  if (!currentUser) {
-    router.push("/(auth)/login");
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [category, setCategory] = useState("General");
+  const [imageUri, setImageUri] = useState<string | null>(null);
+  const [location, setLocation] = useState<Location.LocationObject | null>(null);
+  const [locationName, setLocationName] = useState("Unknown location");
+  const [loading, setLoading] = useState(false);
+  const [cameraPermission, requestCameraPermission] = ImagePicker.useCameraPermissions();
+
+  // Check if user is logged in
+  useEffect(() => {
+    if (!currentUser) {
+      Alert.alert(
+        "Login Required",
+        "You need to be logged in to create posts.",
+        [{ text: "OK", onPress: () => router.push("/(auth)/login") }]
+      );
+    } else {
+      // Request location permissions when component mounts
+      (async () => {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== "granted") {
+          Alert.alert("Permission Denied", "Location permission is needed to create posts.");
+          return;
+        }
+
+        try {
+          const currentLocation = await Location.getCurrentPositionAsync({});
+          setLocation(currentLocation);
+
+          // Get location name
+          const reverseGeocode = await Location.reverseGeocodeAsync({
+            latitude: currentLocation.coords.latitude,
+            longitude: currentLocation.coords.longitude
+          });
+
+          if (reverseGeocode.length > 0) {
+            const address = reverseGeocode[0];
+            const locationString = [
+              address.street,
+              address.city,
+              address.region
+            ].filter(Boolean).join(", ");
+
+            setLocationName(locationString || "Unknown location");
+          }
+        } catch (error) {
+          console.error("Error getting location:", error);
+          Alert.alert("Location Error", "Failed to get your current location.");
+        }
+      })();
+    }
+  }, [currentUser]);
+
+  // Handle taking a photo
+  const takePhoto = async () => {
+    if (!cameraPermission?.granted) {
+      const permission = await requestCameraPermission();
+      if (!permission.granted) {
+        Alert.alert("Permission Denied", "Camera permission is needed to take photos.");
+        return;
+      }
+    }
+
+    try {
+      const result = await ImagePicker.launchCameraAsync({
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        setImageUri(result.assets[0].uri);
+      }
+    } catch (error) {
+      console.error("Error taking photo:", error);
+      Alert.alert("Camera Error", "Failed to take photo.");
+    }
+  };
+
+  // Function to upload image to Firebase Storage
+  const uploadImage = async (uri: string): Promise<string> => {
+    const response = await fetch(uri);
+    const blob = await response.blob();
+
+    const storage = getStorage();
+    const filename = `posts/${Date.now()}-${currentUser?.uid}`;
+    const storageRef = ref(storage, filename);
+
+    await uploadBytes(storageRef, blob);
+    return await getDownloadURL(storageRef);
+  };
+
+  // Handle post submission
+  const handleSubmit = async () => {
+    if (!currentUser) {
+      Alert.alert("Error", "You must be logged in to create a post.");
+      return;
+    }
+
+    if (!title.trim()) {
+      Alert.alert("Error", "Please enter a title for your post.");
+      return;
+    }
+
+    if (!content.trim()) {
+      Alert.alert("Error", "Please enter content for your post.");
+      return;
+    }
+
+    if (!location) {
+      Alert.alert("Error", "Location is required for creating a post.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+
+      // Upload image to Firebase Storage
+      let photoURL = undefined;
+
+      // if (imageUri) {
+      //   photoURL = await uploadImage(imageUri);
+      // }
+
+      const postData = {
+        title,
+        content,
+        category,
+        locationName,
+        location: {
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+        },
+        authorId: currentUser.uid,
+        authorName: currentUser.displayName || "Anonymous User",
+        photoURL: "", // Placeholder image
+        isPublic: true,
+      };
+
+      const postId = await createPost(postData);
+
+      if (postId) {
+        Alert.alert("Success", "Your post has been created successfully!", [
+          {
+            text: "View Post",
+            onPress: () => router.push({
+              pathname: "/post/[id]",
+              params: { id: postId }
+            })
+          },
+          {
+            text: "Back to Home",
+            // onPress: () => router.push("/(tabs)")
+            onPress: () => router.replace("/(tabs)")
+          }
+        ]);
+
+        // Reset form
+        setTitle("");
+        setContent("");
+        setCategory("General");
+        setImageUri(null);
+      } else {
+        Alert.alert("Error", "Failed to create post. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error creating post:", error);
+      Alert.alert("Error", "An error occurred while creating your post.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={Colors.light.tint} />
+        <Text style={styles.loadingText}>Creating your post...</Text>
+      </View>
+    );
   }
-*/
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Post Screen</Text>
-      <Text style={styles.subtitle}>
-        Protected content available to logged in users
-      </Text>
-    </View>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={styles.container}
+    >
+      <ScrollView style={styles.scrollView}>
+        <ThemedView style={styles.formContainer}>
+          <ThemedText style={styles.title}>Create a New Post</ThemedText>
+
+          <View style={styles.formGroup}>
+            <ThemedText style={styles.label}>Title</ThemedText>
+            <TextInput
+              style={styles.input}
+              value={title}
+              onChangeText={setTitle}
+              placeholder="Enter a title for your post"
+              maxLength={100}
+            />
+          </View>
+
+          <View style={styles.formGroup}>
+            <ThemedText style={styles.label}>Category</ThemedText>
+            <View style={styles.pickerContainer}>
+              <Picker
+                selectedValue={category}
+                onValueChange={(itemValue) => setCategory(itemValue)}
+                style={styles.picker}
+              >
+                <Picker.Item label="General" value="General" />
+                <Picker.Item label="Traffic" value="Traffic" />
+                <Picker.Item label="Safety" value="Safety" />
+                <Picker.Item label="Event" value="Event" />
+                <Picker.Item label="Infrastructure" value="Infrastructure" />
+              </Picker>
+            </View>
+          </View>
+
+          <View style={styles.formGroup}>
+            <ThemedText style={styles.label}>Content</ThemedText>
+            <TextInput
+              style={[styles.input, styles.textArea]}
+              value={content}
+              onChangeText={setContent}
+              placeholder="Describe what's happening..."
+              multiline
+              numberOfLines={5}
+              textAlignVertical="top"
+            />
+          </View>
+
+          <View style={styles.formGroup}>
+            <ThemedText style={styles.label}>Location</ThemedText>
+            <View style={styles.locationContainer}>
+              <ThemedText style={styles.locationText}>📍 {locationName}</ThemedText>
+            </View>
+          </View>
+
+          <View style={styles.formGroup}>
+            <ThemedText style={styles.label}>Photo</ThemedText>
+            <TouchableOpacity style={styles.photoButton} onPress={takePhoto}>
+              <ThemedText style={styles.photoButtonText}>
+                {imageUri ? "Change Photo" : "Take a Photo"}
+              </ThemedText>
+            </TouchableOpacity>
+
+            {imageUri && (
+              <Image source={{ uri: imageUri }} style={styles.previewImage} />
+            )}
+          </View>
+
+          <TouchableOpacity
+            style={styles.submitButton}
+            onPress={handleSubmit}
+            disabled={loading}
+          >
+            <ThemedText style={styles.submitButtonText}>Post</ThemedText>
+          </TouchableOpacity>
+        </ThemedView>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  loadingContainer: {
+    flex: 1,
     justifyContent: "center",
     alignItems: "center",
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+  },
+  formContainer: {
     padding: 20,
   },
   title: {
     fontSize: 24,
     fontWeight: "bold",
+    marginBottom: 20,
+    textAlign: "center",
+  },
+  formGroup: {
+    marginBottom: 20,
+  },
+  label: {
+    fontSize: 16,
+    marginBottom: 8,
+    fontWeight: "500",
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 6,
+    padding: 12,
+    fontSize: 16,
+    backgroundColor: "#fff",
+  },
+  textArea: {
+    height: 120,
+  },
+  pickerContainer: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 6,
+    backgroundColor: "#fff",
+  },
+  picker: {
+    height: 50,
+  },
+  locationContainer: {
+    backgroundColor: "#f0f0f0",
+    padding: 12,
+    borderRadius: 6,
+  },
+  locationText: {
+    fontSize: 16,
+  },
+  photoButton: {
+    backgroundColor: "#e0e0e0",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 6,
+    alignItems: "center",
     marginBottom: 10,
   },
-  subtitle: {
+  photoButtonText: {
     fontSize: 16,
-    color: "#666",
+    fontWeight: "500",
   },
+  previewImage: {
+    width: "100%",
+    height: 200,
+    borderRadius: 6,
+    marginTop: 10,
+  },
+  submitButton: {
+    backgroundColor: Colors.light.tint,
+    paddingVertical: 14,
+    borderRadius: 6,
+    alignItems: "center",
+    marginTop: 10,
+  },
+  submitButtonText: {
+    color: "#ffffff",
+    fontSize: 18,
+    fontWeight: "bold",
+  }
 });

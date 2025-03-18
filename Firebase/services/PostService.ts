@@ -77,6 +77,13 @@ export const fetchPublicPosts = async (
         category: processedData.category || 'General',
         createdAt: processedData.createdAt,
         location: processedData.locationName || 'Unknown location',
+        // these lines to include coordinates for the map
+        coordinates: processedData.location
+          ? {
+              latitude: processedData.location.latitude,
+              longitude: processedData.location.longitude,
+            }
+          : null,
         photoURL: processedData.photoURL,
         likes: processedData.likes || 0,
         verified: processedData.verified || 0,

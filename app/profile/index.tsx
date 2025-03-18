@@ -54,7 +54,7 @@ export default function ProfileScreen() {
     setIsModalVisible(false);
   };
 
-  const handleEditProfilePicture = () => {};
+  const handleEditProfilePicture = () => { };
   const handleChangePassword = () => {
     setIsChangePasswordVisible(true);
   };
@@ -71,16 +71,6 @@ export default function ProfileScreen() {
   };
   return (
     <View style={styles.container}>
-<<<<<<< HEAD
-      {currentUser && (
-        <View>
-          <Text>{userInfo?.id}</Text>
-          <Text>{userInfo?.username}</Text>
-          <Text>{userInfo?.email}</Text>
-          <Text>{userInfo?.createdAt.toDate().toLocaleDateString()}</Text>
-          <Text>{userInfo?.lastLogin[0].toDate().toLocaleString()}</Text>
-          <Text>{userInfo?.photoURL}</Text>
-=======
       {currentUser && userInfo && (
         <View style={styles.profileContainer}>
           <Image
@@ -88,8 +78,8 @@ export default function ProfileScreen() {
               uri: userInfo.photoURL
                 ? userInfo.photoURL
                 : Image.resolveAssetSource(
-                    require("@/assets/images/profile.jpg")
-                  ).uri,
+                  require("@/assets/images/profile.jpg")
+                ).uri,
             }}
             style={styles.profileImage}
           />
@@ -103,7 +93,6 @@ export default function ProfileScreen() {
               Last Login: {userInfo.lastLogin[0].toDate().toLocaleString()}
             </Text>
           </View>
->>>>>>> origin/main
         </View>
       )}
       <View style={styles.buttonContainer}>
@@ -126,7 +115,7 @@ export default function ProfileScreen() {
           />
         </View>
         <View style={styles.button}>
-          <Button title="My Posts" onPress={() => {}} />
+          <Button title="My Posts" onPress={() => { }} />
         </View>
       </View>
       {userInfo && (
