@@ -91,8 +91,8 @@ export const updateUserProfile = async (
   updates: Partial<UserProfile>
 ): Promise<boolean> => {
   try {
-    // Don't allow updating id and createdAt
-    const { id, createdAt, ...validUpdates } = updates;
+    // only allow update username,and lastLogin
+    const { ...validUpdates } = updates;
 
     return await updateDocument(COLLECTIONS.USERS, userId, validUpdates);
   } catch (error) {
