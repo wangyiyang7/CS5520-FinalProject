@@ -23,7 +23,6 @@ Basic user profile data storage and retrieval
 Profile settings screen
 
 
-
 For You (Post and Map Features):
 
 Posts Collection and CRUD:
@@ -46,7 +45,6 @@ Enhance Post Detail:
 Create detailed post view with all metadata
 Add verification/like functionality
 Connect post detail to map view
-
 
 
 Where You Should Start
@@ -78,7 +76,6 @@ After basic posts are working, implement the map view
 Connect posts to map markers
 
 
-
 Data Model for Your README
 Here's a clear description of the data model you can use for your README:
 1. Users Collection
@@ -89,7 +86,7 @@ Copyusers/{userId}
   - createdAt: timestamp
   - lastLogin: timestamp
   - notificationPreferences: object
-2. Posts Collection
+1. Posts Collection
 Copyposts/{postId}
   - title: string
   - content: string
@@ -100,7 +97,7 @@ Copyposts/{postId}
   - authorId: string (reference to users collection)
   - likes: number
   - verified: number (count of user verifications)
-3. Notifications Collection (Sub-collection)
+1. Notifications Collection (Sub-collection)
 Copyusers/{userId}/notifications/{notificationId}
   - type: string
   - content: string
