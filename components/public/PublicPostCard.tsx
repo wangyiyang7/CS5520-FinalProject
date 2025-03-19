@@ -52,6 +52,11 @@ interface PublicPostCardProps {
 export function PublicPostCard({ post, onPress }: PublicPostCardProps) {
     const colorScheme = useColorScheme() ?? 'light';
 
+
+    // Format location for display
+    const formattedLocation = post.locationName || 'Unknown location';
+
+
     return (
         <TouchableOpacity
             onPress={() => onPress(post)}
@@ -77,7 +82,7 @@ export function PublicPostCard({ post, onPress }: PublicPostCardProps) {
                 )}
 
                 <View style={styles.footer}>
-                    <ThemedText style={styles.location}>📍 {post.location}</ThemedText>
+                    <ThemedText style={styles.location}>📍 {formattedLocation}</ThemedText>
                     <ThemedText style={styles.location}>👍 {post.likes}</ThemedText>
                     <ThemedText style={styles.location}>✅ {post.verified}</ThemedText>
 
