@@ -16,14 +16,22 @@ import {
   deleteDocument,
 } from '@/Firebase/firestoreHelper';
 
+// Updated interface to match the full structure of a post
 export interface PublicPost {
   id: string;
   title: string;
   content: string;
   category: string;
   createdAt: Date;
-  location: string;
+  locationName: string;
+  location: {
+    latitude: number;
+    longitude: number;
+  };
+  authorId: string;
+  authorName: string;
   photoURL?: string;
+  isPublic: boolean;
   likes: number;
   verified: number;
 }
@@ -76,15 +84,15 @@ export const fetchPublicPosts = async (
         content: processedData.content || '',
         category: processedData.category || 'General',
         createdAt: processedData.createdAt,
-        location: processedData.locationName || 'Unknown location',
-        // these lines to include coordinates for the map
-        coordinates: processedData.location
-          ? {
-              latitude: processedData.location.latitude,
-              longitude: processedData.location.longitude,
-            }
-          : null,
+        locationName: processedData.locationName || 'Unknown location',
+        location: processedData.location || {
+          latitude: 0,
+          longitude: 0,
+        },
+        authorId: processedData.authorId || '',
+        authorName: processedData.authorName || 'Anonymous',
         photoURL: processedData.photoURL,
+        isPublic: processedData.isPublic || true,
         likes: processedData.likes || 0,
         verified: processedData.verified || 0,
       };
@@ -232,8 +240,15 @@ export const getPostById = async (
       content: processedData.content || '',
       category: processedData.category || 'General',
       createdAt: processedData.createdAt,
-      location: processedData.locationName || 'Unknown location',
+      locationName: processedData.locationName || 'Unknown location',
+      location: processedData.location || {
+        latitude: 0,
+        longitude: 0,
+      },
+      authorId: processedData.authorId || '',
+      authorName: processedData.authorName || 'Anonymous',
       photoURL: processedData.photoURL,
+      isPublic: processedData.isPublic || true,
       likes: processedData.likes || 0,
       verified: processedData.verified || 0,
     };
@@ -299,5 +314,57 @@ export const verifyPost = async (postId: string): Promise<boolean> => {
   } catch (error) {
     console.error('Error verifying post:', error);
     return false;
+  }
+};
+
+// Fetch posts by author ID
+export const fetchPostsByAuthor = async (
+  authorId: string,
+  limitCount = 20
+): Promise<PublicPost[]> => {
+  try {
+    console.log(`Fetching posts by author ${authorId}...`);
+
+    const whereConditions: QueryParams[] = [
+      { fieldPath: 'authorId', operator: '==', value: authorId },
+    ];
+
+    const results = await queryDocuments(
+      COLLECTIONS.POSTS,
+      whereConditions,
+      'createdAt',
+      'desc',
+      limitCount
+    );
+
+    console.log(`Fetched ${results.length} posts by author ${authorId}`);
+
+    const posts: PublicPost[] = results.map((doc) => {
+      const processedData = processDocumentData(doc);
+
+      return {
+        id: doc.id,
+        title: processedData.title || 'Untitled Post',
+        content: processedData.content || '',
+        category: processedData.category || 'General',
+        createdAt: processedData.createdAt,
+        locationName: processedData.locationName || 'Unknown location',
+        location: processedData.location || {
+          latitude: 0,
+          longitude: 0,
+        },
+        authorId: processedData.authorId || '',
+        authorName: processedData.authorName || 'Anonymous',
+        photoURL: processedData.photoURL,
+        isPublic: processedData.isPublic || true,
+        likes: processedData.likes || 0,
+        verified: processedData.verified || 0,
+      };
+    });
+
+    return posts;
+  } catch (error) {
+    console.error(`Error fetching posts by author ${authorId}:`, error);
+    return [];
   }
 };
