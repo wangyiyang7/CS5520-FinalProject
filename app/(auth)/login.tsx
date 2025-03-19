@@ -20,6 +20,7 @@ import { useRoute } from "@react-navigation/native";
 import { FirebaseError } from "@firebase/util";
 import { getDocument, updateDocument } from "@/Firebase/firestoreHelper";
 import { Timestamp } from "firebase/firestore";
+import { sendPasswordResetEmail } from "firebase/auth";
 
 export default function login() {
   const [email, setEmail] = useState("");
@@ -39,7 +40,7 @@ export default function login() {
       );
 
       if (userCredential) {
-        router.push("/(tabs)/post");
+        router.push("/(tabs)");
         const userDoc = await getDocument("users", userCredential.user.uid);
 
         if (userDoc) {
@@ -62,6 +63,15 @@ export default function login() {
       if (error instanceof FirebaseError) {
         setError(error.message);
       }
+    }
+  };
+
+  const handleSendResetEmail = async () => {
+    try {
+      await sendPasswordResetEmail(auth, email);
+      alert("Reset email sent, check your email.");
+    } catch (error) {
+      alert("Enter Email");
     }
   };
 
@@ -102,8 +112,11 @@ export default function login() {
         </TouchableOpacity>
       </View>
 
-      <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-        <Text style={styles.backText}>Go Back</Text>
+      <TouchableOpacity
+        style={styles.backButton}
+        onPress={handleSendResetEmail}
+      >
+        <Text style={styles.backText}>Forget Password</Text>
       </TouchableOpacity>
     </KeyboardAvoidingView>
   );
