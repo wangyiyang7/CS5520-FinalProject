@@ -1,54 +1,160 @@
 /**
-* Displays detailed information for a specific community post, including content, category, 
-* metrics, and interaction elements for guest and authenticated users.
-*/
+ * Displays post detail screen with author-specific actions (edit, delete) and 
+ * interactive features for all users (like, verify, share).
+ */
 
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Image, ScrollView, ActivityIndicator, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState, useContext } from 'react';
+import { StyleSheet, View, Image, ScrollView, ActivityIndicator, TouchableOpacity, Alert, Share } from 'react-native';
 import { useLocalSearchParams, Stack, useRouter } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { getPostById, PublicPost } from '@/Firebase/services/PostService';
+import { getPostById, PublicPost, likePost, verifyPost, deletePost } from '@/Firebase/services/PostService';
 import { CategoryBadge } from '@/components/public/PublicPostCard';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { AuthContext } from '@/components/AuthContext';
+
+import { Ionicons } from '@expo/vector-icons';
 
 export default function PostDetailScreen() {
     const { id } = useLocalSearchParams();
     const [post, setPost] = useState<PublicPost | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [liked, setLiked] = useState(false);
+    const [verified, setVerified] = useState(false);
     const colorScheme = useColorScheme() ?? 'light';
     const router = useRouter();
+    const { currentUser } = useContext(AuthContext);
+
+    // Check if current user is the author of the post
+    const isAuthor = currentUser && post?.authorId === currentUser.uid;
 
     useEffect(() => {
-        async function loadPost() {
-            setLoading(true);
-            try {
-                const postId = Array.isArray(id) ? id[0] : id;
-                if (!postId) {
-                    setError('Post ID not found');
-                    return;
-                }
-
-                const postData = await getPostById(postId);
-                if (!postData) {
-                    setError('Post not found');
-                    return;
-                }
-
-                setPost(postData);
-                setError(null);
-            } catch (err) {
-                console.error('Error loading post:', err);
-                setError('Failed to load post');
-            } finally {
-                setLoading(false);
-            }
-        }
+        console.log('currentUser: ', currentUser && currentUser.uid);
+        console.log('post?.authorId: ', post?.authorId);
+        console.log('post?: ', post);
 
         loadPost();
-    }, [id]);
+    }, [id, post?.authorId]);
+
+    async function loadPost() {
+        setLoading(true);
+        try {
+            const postId = Array.isArray(id) ? id[0] : id;
+            if (!postId) {
+                setError('Post ID not found');
+                return;
+            }
+
+            const postData = await getPostById(postId);
+            if (!postData) {
+                setError('Post not found');
+                return;
+            }
+
+            setPost(postData);
+            setError(null);
+        } catch (err) {
+            console.error('Error loading post:', err);
+            setError('Failed to load post');
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    // Handle Like Post
+    const handleLike = async () => {
+        if (!post) return;
+
+        try {
+            const success = await likePost(post.id);
+            if (success) {
+                setPost({
+                    ...post,
+                    likes: post.likes + 1
+                });
+                setLiked(true);
+            }
+        } catch (error) {
+            console.error('Error liking post:', error);
+            Alert.alert('Error', 'Failed to like post');
+        }
+    };
+
+    // Handle Verify Post
+    const handleVerify = async () => {
+        if (!post) return;
+
+        try {
+            const success = await verifyPost(post.id);
+            if (success) {
+                setPost({
+                    ...post,
+                    verified: post.verified + 1
+                });
+                setVerified(true);
+            }
+        } catch (error) {
+            console.error('Error verifying post:', error);
+            Alert.alert('Error', 'Failed to verify post');
+        }
+    };
+
+    // Handle Share Post
+    const handleShare = async () => {
+        if (!post) return;
+
+        try {
+            await Share.share({
+                message: `Check out this post on Local Buzz: ${post.title}\n\n${post.content}\n\nLocation: ${post.locationName}`,
+                title: post.title,
+            });
+        } catch (error) {
+            console.error('Error sharing post:', error);
+        }
+    };
+
+    // Handle Edit Post
+    const handleEdit = () => {
+        if (!post) return;
+
+        router.push({
+            pathname: "/post/edit/[id]",
+            params: { id: post.id }
+        });
+    };
+
+    // Handle Delete Post
+    const handleDelete = async () => {
+        if (!post) return;
+
+        Alert.alert(
+            "Delete Post",
+            "Are you sure you want to delete this post? This action cannot be undone.",
+            [
+                { text: "Cancel", style: "cancel" },
+                {
+                    text: "Delete",
+                    style: "destructive",
+                    onPress: async () => {
+                        try {
+                            const success = await deletePost(post.id);
+                            if (success) {
+                                Alert.alert("Success", "Post deleted successfully");
+                                router.replace("/(tabs)");
+                            } else {
+                                Alert.alert("Error", "Failed to delete post");
+                            }
+                        } catch (error) {
+                            console.error('Error deleting post:', error);
+                            Alert.alert("Error", "An error occurred while deleting the post");
+                        }
+                    }
+                }
+            ]
+        );
+    };
 
     // Format date for display
     const formatDate = (date: Date): string => {
@@ -88,9 +194,26 @@ export default function PostDetailScreen() {
         );
     }
 
+    // Format location for display
+    const formattedLocation = post.locationName || 'Unknown location';
+
     return (
         <ThemedView style={styles.container}>
-            <Stack.Screen options={{ title: post.category || 'Post Detail' }} />
+            <Stack.Screen
+                options={{
+                    title: post.category || 'Post Detail',
+                    headerRight: () => isAuthor ? (
+                        <View style={styles.headerButtons}>
+                            <TouchableOpacity onPressIn={handleEdit} style={styles.headerButton}>
+                                <Ionicons name="pencil" size={24} color={Colors.light.tint} />
+                            </TouchableOpacity>
+                            <TouchableOpacity onPressIn={handleDelete} style={styles.headerButton}>
+                                <Ionicons name="trash" size={24} color="#FF3B30" />
+                            </TouchableOpacity>
+                        </View>
+                    ) : null
+                }}
+            />
 
             <ScrollView style={styles.scrollView}>
                 <View style={styles.header}>
@@ -111,7 +234,12 @@ export default function PostDetailScreen() {
                 <ThemedText style={styles.content}>{post.content}</ThemedText>
 
                 <View style={styles.locationContainer}>
-                    <ThemedText style={styles.locationText}>📍 {post.location}</ThemedText>
+                    <ThemedText style={styles.locationText}>📍 {formattedLocation}</ThemedText>
+                    {post.location && (
+                        <ThemedText style={styles.coordsText}>
+                            Coordinates for map feature: {post.location.latitude.toFixed(4)}, {post.location.longitude.toFixed(4)}
+                        </ThemedText>
+                    )}
                 </View>
 
                 <View style={styles.statsContainer}>
@@ -123,19 +251,78 @@ export default function PostDetailScreen() {
                         <ThemedText style={styles.statLabel}>Verified</ThemedText>
                         <ThemedText style={styles.statValue}>{post.verified}</ThemedText>
                     </View>
+                    {post.authorName && (
+                        <View style={styles.statItem}>
+                            <ThemedText style={styles.statLabel}>Posted by</ThemedText>
+                            <ThemedText style={styles.statValue}>{post.authorName}</ThemedText>
+                        </View>
+                    )}
                 </View>
 
+
+
                 <View style={styles.actionsContainer}>
-                    <TouchableOpacity style={styles.actionButton}>
-                        <ThemedText style={styles.actionButtonText}>👍 Like</ThemedText>
+                    <TouchableOpacity
+                        style={[
+                            styles.actionButton,
+                            liked && styles.actionButtonActive,
+                            isAuthor && styles.actionButtonDisabled
+                        ]}
+                        onPress={handleLike}
+                        disabled={!!liked || !!isAuthor}
+                    >
+                        <ThemedText style={styles.actionButtonText}>
+                            👍 {isAuthor ? "Your Post" : liked ? 'Liked' : 'Like'}
+                        </ThemedText>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.actionButton}>
-                        <ThemedText style={styles.actionButtonText}>✅ Verify</ThemedText>
+                    <TouchableOpacity
+                        style={[
+                            styles.actionButton,
+                            verified && styles.actionButtonActive,
+                            isAuthor && styles.actionButtonDisabled
+                        ]}
+                        onPress={handleVerify}
+                        disabled={!!verified || !!isAuthor}
+                    >
+                        <ThemedText style={styles.actionButtonText}>
+                            ✅ {isAuthor ? "Your Post" : verified ? 'Verified' : 'Verify'}
+                        </ThemedText>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.actionButton}>
+                    <TouchableOpacity
+                        style={styles.actionButton}
+                        onPress={handleShare}
+                    >
                         <ThemedText style={styles.actionButtonText}>📤 Share</ThemedText>
                     </TouchableOpacity>
                 </View>
+
+
+
+
+                {isAuthor && (
+                    <View style={styles.authorActionsContainer}>
+                        <TouchableOpacity
+                            style={styles.authorActionButton}
+                            onPress={handleEdit}
+                        >
+                            <Ionicons name="pencil" size={20} color="white" />
+                            <ThemedText style={styles.authorActionButtonText}>Edit Post</ThemedText>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={[styles.authorActionButton, styles.deleteButton]}
+                            onPress={handleDelete}
+                        >
+                            <Ionicons name="trash" size={20} color="white" />
+                            <ThemedText style={styles.authorActionButtonText}>Delete Post</ThemedText>
+                        </TouchableOpacity>
+                    </View>
+                )}
+
+
+
+
+
+
             </ScrollView>
         </ThemedView>
     );
@@ -169,6 +356,13 @@ const styles = StyleSheet.create({
     backButtonText: {
         fontWeight: '500',
     },
+    headerButtons: {
+        flexDirection: 'row',
+        marginRight: 8,
+    },
+    headerButton: {
+        marginLeft: 16,
+    },
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -195,6 +389,28 @@ const styles = StyleSheet.create({
         lineHeight: 24,
         marginBottom: 16,
     },
+    mapContainer: {
+        height: 200,
+        marginBottom: 16,
+        borderRadius: 8,
+        overflow: 'hidden',
+    },
+    map: {
+        ...StyleSheet.absoluteFillObject,
+    },
+    viewMapButton: {
+        position: 'absolute',
+        right: 8,
+        bottom: 8,
+        backgroundColor: 'rgba(0,0,0,0.7)',
+        paddingVertical: 6,
+        paddingHorizontal: 12,
+        borderRadius: 16,
+    },
+    viewMapButtonText: {
+        color: 'white',
+        fontSize: 12,
+    },
     locationContainer: {
         marginBottom: 16,
         padding: 12,
@@ -203,6 +419,11 @@ const styles = StyleSheet.create({
     },
     locationText: {
         fontSize: 14,
+        marginBottom: 4,
+    },
+    coordsText: {
+        fontSize: 12,
+        color: '#666',
     },
     statsContainer: {
         flexDirection: 'row',
@@ -237,7 +458,37 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         alignItems: 'center',
     },
+    actionButtonActive: {
+        backgroundColor: Colors.light.tint,
+    },
     actionButtonText: {
         fontWeight: '500',
+    },
+    actionButtonDisabled: {
+        backgroundColor: '#f0f0f0',
+        opacity: 0.7,
+    },
+    authorActionsContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 16,
+    },
+    authorActionButton: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: Colors.light.tint,
+        padding: 10,
+        borderRadius: 8,
+        marginHorizontal: 4,
+    },
+    deleteButton: {
+        backgroundColor: '#FF3B30',
+    },
+    authorActionButtonText: {
+        color: 'white',
+        fontWeight: '500',
+        marginLeft: 6,
     },
 });

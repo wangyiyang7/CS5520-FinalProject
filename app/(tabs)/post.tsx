@@ -29,6 +29,9 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { ImageManipulator } from "expo-image-manipulator";
 
+import { getUserProfile } from '@/Firebase/services/UserService';
+
+
 export default function PostScreen() {
   const router = useRouter();
   const { currentUser } = useContext(AuthContext);
@@ -43,6 +46,7 @@ export default function PostScreen() {
 
   // Check if user is logged in
   useEffect(() => {
+
     if (!currentUser) {
       Alert.alert(
         "Login Required",
@@ -50,6 +54,9 @@ export default function PostScreen() {
         [{ text: "OK", onPress: () => router.push("/(auth)/login") }]
       );
     } else {
+
+      console.log("User is logged in", currentUser);
+
       // Request location permissions when component mounts
       (async () => {
         const { status } = await Location.requestForegroundPermissionsAsync();
@@ -158,6 +165,10 @@ export default function PostScreen() {
       //   photoURL = await uploadImage(imageUri);
       // }
 
+
+      const userProfile = await getUserProfile(currentUser.uid);
+
+
       const postData = {
         title,
         content,
@@ -168,7 +179,7 @@ export default function PostScreen() {
           longitude: location.coords.longitude,
         },
         authorId: currentUser.uid,
-        authorName: currentUser.displayName || "Anonymous User",
+        authorName: currentUser?.displayName || userProfile?.username || "Anonymous",
         photoURL: "", // Placeholder image
         isPublic: true,
       };
