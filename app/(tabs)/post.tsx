@@ -15,14 +15,14 @@ import {
   Alert,
   Image,
   KeyboardAvoidingView,
-  Platform
+  Platform,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { AuthContext } from "@/components/AuthContext";
 import { useRouter } from "expo-router";
 import { createPost } from "@/Firebase/services/PostService";
-import * as ImagePicker from 'expo-image-picker';
-import * as Location from 'expo-location';
+import * as ImagePicker from "expo-image-picker";
+import * as Location from "expo-location";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { Colors } from "@/constants/Colors";
 import { ThemedText } from "@/components/ThemedText";
@@ -36,25 +36,25 @@ export default function PostScreen() {
   const [content, setContent] = useState("");
   const [category, setCategory] = useState("General");
   const [imageUri, setImageUri] = useState<string | null>(null);
-  const [location, setLocation] = useState<Location.LocationObject | null>(null);
+  const [location, setLocation] = useState<Location.LocationObject | null>(
+    null
+  );
   const [locationName, setLocationName] = useState("Unknown location");
   const [loading, setLoading] = useState(false);
-  const [cameraPermission, requestCameraPermission] = ImagePicker.useCameraPermissions();
+  const [cameraPermission, requestCameraPermission] =
+    ImagePicker.useCameraPermissions();
 
   // Check if user is logged in
   useEffect(() => {
-    if (!currentUser) {
-      Alert.alert(
-        "Login Required",
-        "You need to be logged in to create posts.",
-        [{ text: "OK", onPress: () => router.push("/(auth)/login") }]
-      );
-    } else {
+    if (currentUser) {
       // Request location permissions when component mounts
       (async () => {
         const { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== "granted") {
-          Alert.alert("Permission Denied", "Location permission is needed to create posts.");
+          Alert.alert(
+            "Permission Denied",
+            "Location permission is needed to create posts."
+          );
           return;
         }
 
@@ -65,7 +65,7 @@ export default function PostScreen() {
           // Get location name
           const reverseGeocode = await Location.reverseGeocodeAsync({
             latitude: currentLocation.coords.latitude,
-            longitude: currentLocation.coords.longitude
+            longitude: currentLocation.coords.longitude,
           });
 
           if (reverseGeocode.length > 0) {
@@ -73,8 +73,10 @@ export default function PostScreen() {
             const locationString = [
               address.street,
               address.city,
-              address.region
-            ].filter(Boolean).join(", ");
+              address.region,
+            ]
+              .filter(Boolean)
+              .join(", ");
 
             setLocationName(locationString || "Unknown location");
           }
@@ -91,7 +93,10 @@ export default function PostScreen() {
     if (!cameraPermission?.granted) {
       const permission = await requestCameraPermission();
       if (!permission.granted) {
-        Alert.alert("Permission Denied", "Camera permission is needed to take photos.");
+        Alert.alert(
+          "Permission Denied",
+          "Camera permission is needed to take photos."
+        );
         return;
       }
     }
@@ -150,7 +155,6 @@ export default function PostScreen() {
     setLoading(true);
 
     try {
-
       // Upload image to Firebase Storage
       let photoURL = undefined;
 
@@ -179,16 +183,17 @@ export default function PostScreen() {
         Alert.alert("Success", "Your post has been created successfully!", [
           {
             text: "View Post",
-            onPress: () => router.push({
-              pathname: "/post/[id]",
-              params: { id: postId }
-            })
+            onPress: () =>
+              router.push({
+                pathname: "/post/[id]",
+                params: { id: postId },
+              }),
           },
           {
             text: "Back to Home",
             // onPress: () => router.push("/(tabs)")
-            onPress: () => router.replace("/(tabs)")
-          }
+            onPress: () => router.replace("/(tabs)"),
+          },
         ]);
 
         // Reset form
@@ -269,7 +274,9 @@ export default function PostScreen() {
           <View style={styles.formGroup}>
             <ThemedText style={styles.label}>Location</ThemedText>
             <View style={styles.locationContainer}>
-              <ThemedText style={styles.locationText}>📍 {locationName}</ThemedText>
+              <ThemedText style={styles.locationText}>
+                📍 {locationName}
+              </ThemedText>
             </View>
           </View>
 
@@ -389,5 +396,5 @@ const styles = StyleSheet.create({
     color: "#ffffff",
     fontSize: 18,
     fontWeight: "bold",
-  }
+  },
 });
