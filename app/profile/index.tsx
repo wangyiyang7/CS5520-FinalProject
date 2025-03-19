@@ -69,6 +69,22 @@ export default function ProfileScreen() {
   const handleCancelNotificationSettings = () => {
     setIsNotificationSettingsVisible(false);
   };
+
+  const handleConfirmNotificationSettings = async (settings: { categories: string[], radius: number }) => {
+    if (currentUser?.uid) {
+      const success = await updateUserProfile(currentUser.uid, {
+        notificationPreferences: settings,
+      });
+      if (success && userInfo) {
+        setUserInfo({
+          ...userInfo,
+          notificationPreferences: settings,
+        });
+      }
+    }
+    setIsNotificationSettingsVisible(false);
+  };
+
   return (
     <View style={styles.container}>
       {currentUser && userInfo && (
@@ -133,10 +149,15 @@ export default function ProfileScreen() {
           onCancel={handleCancelChangePassword}
         />
       )}
-      <NotificationSettingsModal
-        visible={isNotificationSettingsVisible}
-        onCancel={handleCancelNotificationSettings}
-      />
+      {userInfo && (
+        <NotificationSettingsModal
+          visible={isNotificationSettingsVisible}
+          onCancel={handleCancelNotificationSettings}
+          onConfirm={handleConfirmNotificationSettings}
+          initialCategories={userInfo.notificationPreferences.categories}
+          initialRadius={userInfo.notificationPreferences.radius}
+        />
+      )}
     </View>
   );
 }
