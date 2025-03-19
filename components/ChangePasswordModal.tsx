@@ -1,6 +1,7 @@
 import React from "react";
 import { Modal, View, Text, Button, StyleSheet } from "react-native";
 import { getAuth, sendPasswordResetEmail } from "firebase/auth";
+import { auth } from "@/Firebase/firebaseSetup";
 
 interface ChangePasswordModalProps {
   visible: boolean;
@@ -14,7 +15,6 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
   onCancel,
 }) => {
   const handleSendResetEmail = async () => {
-    const auth = getAuth();
     try {
       await sendPasswordResetEmail(auth, email);
       alert("Reset email sent, check your email.");

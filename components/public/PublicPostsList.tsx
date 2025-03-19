@@ -29,7 +29,7 @@ export function PublicPostsList() {
         setLoading(true);
         try {
             const fetchedPosts = await fetchPublicPosts(10); // Fetch up to 10 posts
-            console.log(`Fetched ${fetchedPosts.length} posts:`, JSON.stringify(fetchedPosts, null, 2));
+            //console.log(`Fetched ${fetchedPosts.length} posts:`, JSON.stringify(fetchedPosts, null, 2));
             setPosts(fetchedPosts);
         } catch (error) {
             console.error('Error loading posts:', error);

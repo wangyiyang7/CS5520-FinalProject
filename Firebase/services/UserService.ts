@@ -23,7 +23,6 @@ export interface UserProfile {
   notificationPreferences: {
     categories: string[];
     radius: number;
-    notifyOnAll: boolean;
   };
 }
 
@@ -42,9 +41,9 @@ export const createUserProfile = async (
       createdAt: now,
       lastLogin: [now, now],
       notificationPreferences: {
-        categories: ["Traffic", "Safety", "Event", "Infrastructure"],
-        radius: 5, // Default 5km/mi radius
-        notifyOnAll: false,
+        categories: [],
+        radius: 0,
+        
       },
     };
 
@@ -75,8 +74,8 @@ export const getUserProfile = async (
       lastLogin: doc.lastLogin,
       notificationPreferences: processedData.notificationPreferences || {
         categories: [],
-        radius: 5,
-        notifyOnAll: false,
+        radius: 0,
+        
       },
     };
   } catch (error) {
