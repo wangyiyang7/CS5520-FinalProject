@@ -47,13 +47,7 @@ export default function PostScreen() {
   // Check if user is logged in
   useEffect(() => {
 
-    if (!currentUser) {
-      Alert.alert(
-        "Login Required",
-        "You need to be logged in to create posts.",
-        [{ text: "OK", onPress: () => router.push("/(auth)/login") }]
-      );
-    } else {
+    if (currentUser) {
 
       console.log("User is logged in", currentUser);
 
