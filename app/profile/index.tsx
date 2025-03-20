@@ -69,7 +69,7 @@ export default function ProfileScreen() {
   const handleConfirmProfilePicture = async (downloadURL: string) => {
     if (currentUser?.uid && userInfo) {
       const success = await updateUserProfile(currentUser.uid, {
-        username: downloadURL,
+        photoURL: downloadURL,
       });
       if (success) {
         setUserInfo({ ...userInfo, photoURL: downloadURL });
