@@ -48,12 +48,38 @@ Our application uses three main collections in Firestore:
 
 ## Screenshots
 [Insert screenshots here]
+
+
 - Screenshot 1: Authentication screens
-- Screenshot 2: Posts feed
-- Screenshot 3: Post creation
+
+
+|                  Login Screen                   |                  SignUp Screen                  |
+| :---------------------------------------------: | :---------------------------------------------: |
+| <img src="./screenshots/posts.jpg" width="250"> | <img src="./screenshots/posts.jpg" width="250"> |
+
+
 - Screenshot 4: Profile screen
 
 
+|                 Profile Screen                  |                 Profile Screen                  |
+| :---------------------------------------------: | :---------------------------------------------: |
+| <img src="./screenshots/posts.jpg" width="250"> | <img src="./screenshots/posts.jpg" width="250"> |
+
+
+- Screenshot 3: Post creation
+  
+
+|                  Post Creation                  |                  Post Creation                  |
+| :---------------------------------------------: | :---------------------------------------------: |
+| <img src="./screenshots/posts.jpg" width="250"> | <img src="./screenshots/posts.jpg" width="250"> |
+
+
+- Screenshot 2: Posts feed
+
+
+|                    Post Page                    |                  Post Details                   |
+| :---------------------------------------------: | :---------------------------------------------: |
+| <img src="./screenshots/posts.jpg" width="250"> | <img src="./screenshots/posts.jpg" width="250"> |
 
 
 
@@ -94,17 +120,17 @@ Even without logging in, users can view posts and weather information. The weath
 `[Post Detail Page]`
 I implemented dynamic routing for post details using Expo Router. When a user taps on a post, they're taken to this detail view where they can see the full content and interact with the post.
 
-`[Show post creation]`
+`[Post creation]`
 For authenticated users, I created this post creation form. It captures:
 - Title and content
 - Category selection
 - Current location (using Expo Location)
 - Photos using the device camera
 
-`[Code - Camera Integration]`
+`[Camera Integration]`
 Here's how I implemented the camera functionality. I'm using expo-image-picker to access the device camera and allow users to take photos for their posts.
 
-`[Code - Location Services]`
+`[Location Services]`
 For location services, I'm using Expo Location to get the user's current position and reverse geocode it to show a readable location name.
 
 `[Database Structure]`
@@ -122,9 +148,7 @@ I've implemented complete CRUD operations for posts:
 
 # Below i have my branches contibutions timeline descriptions for my pull requests
 
-`------------------------------------`
-# Work Updates for branch (public-content-for-guess-users) Carlos
-`------------------------------------`
+## Work Updates for branch (public-content-for-guess-users) Carlos
 
 1. added Firebase services documentation; outline core utilities and project progress
 2. Firebase Helper file for database transactions
@@ -137,23 +161,16 @@ I've implemented complete CRUD operations for posts:
 7. refactor HomeScreen component to integrate PublicContentHeader and PublicPostsList,
    Commented/Moved unused elements to (<MyWeather />)
 
-`------------------------------------`
-# Work Updates for branch (post-details-page) Carlos
-`------------------------------------`
+## Work Updates for branch (post-details-page) Carlos
 
 1. Create the Dynamic Route File
 Created a new file called `app/post/[id].tsx`. This creates a dynamic route where `[id]` will be replaced with the actual post ID in the URL, allowing for individual post viewing.
 
-2. Modify Post Card Navigation
+1. Modify Post Card Navigation
 Updated the `handlePostPress` function in `PublicPostsList.tsx` to navigate to the detail view when a post is tapped, using Expo Router's navigation with the post ID as a parameter.
 
-<!-- Overlapping on Team Existing Changes/Updates -->
-# None
 
-
-`------------------------------------`
-# Work Updates for branch (create-new-post) Carlos
-`------------------------------------`
+## Work Updates for branch (create-new-post) Carlos
 
 1. Implement Post Creation Form
    Created a comprehensive post creation form with fields for title, content, and category selection, along with camera integration for photos and automatic location capture.
@@ -173,9 +190,7 @@ Updated the `handlePostPress` function in `PublicPostsList.tsx` to navigate to t
    Added functionality to automatically refresh the posts list when navigating back from post creation, ensuring newly created content appears immediately.
 
 
-`------------------------------------`
-# Work Updates for branch (edit-delete-like-verify-share-post-functionalities) Carlos
-`------------------------------------`
+## Work Updates for branch (edit-delete-like-verify-share-post-functionalities) Carlos
 
 1. Added post interaction capabilities including like, verify, share, edit, and delete functionality, enhancing user engagement with content.
 
