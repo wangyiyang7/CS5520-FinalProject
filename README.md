@@ -55,13 +55,6 @@ Our application uses three main collections in Firestore:
 
 
 
-
-
-
-
-
-
-
 ## Team Member Contributions
 
 ### Carlos Semeho Edorh's Contributions:
@@ -94,17 +87,17 @@ Even without logging in, users can view posts and weather information. The weath
 `[Post Detail Page]`
 I implemented dynamic routing for post details using Expo Router. When a user taps on a post, they're taken to this detail view where they can see the full content and interact with the post.
 
-`[Show post creation]`
+`[Post creation]`
 For authenticated users, I created this post creation form. It captures:
 - Title and content
 - Category selection
 - Current location (using Expo Location)
 - Photos using the device camera
 
-`[Code - Camera Integration]`
+`[Camera Integration]`
 Here's how I implemented the camera functionality. I'm using expo-image-picker to access the device camera and allow users to take photos for their posts.
 
-`[Code - Location Services]`
+`[Location Services]`
 For location services, I'm using Expo Location to get the user's current position and reverse geocode it to show a readable location name.
 
 `[Database Structure]`
