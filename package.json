@@ -5,6 +5,7 @@
   "scripts": {
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
+    "postinstall": "node ./scripts/cleanup.js",
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
@@ -47,7 +48,8 @@
     "react-native-screens": "~4.4.0",
     "react-native-web": "~0.19.13",
     "react-native-webview": "13.12.5",
-    "expo-checkbox": "~4.0.1"
+    "expo-checkbox": "~4.0.1",
+    "expo-file-system": "~18.0.11"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
