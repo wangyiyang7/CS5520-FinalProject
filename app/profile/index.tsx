@@ -9,15 +9,19 @@ import { Image, StyleSheet, Platform, View, Text, Button } from "react-native";
 import EditUsernameModal from "@/components/EditUsernameModal";
 import ChangePasswordModal from "@/components/ChangePasswordModal";
 import NotificationSettingsModal from "@/components/NotificationSettingsModal";
+import { useRouter } from "expo-router";
+import ProfilePictureModal from "./profilePicture";
 
 export default function ProfileScreen() {
   const { currentUser } = useContext(AuthContext);
+  const router = useRouter();
 
   const [userInfo, setUserInfo] = useState<UserProfile | null>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isChangePasswordVisible, setIsChangePasswordVisible] = useState(false);
   const [isNotificationSettingsVisible, setIsNotificationSettingsVisible] =
     useState(false);
+  const [isProfilePictureVisible, setIsProfilePictureVisible] = useState(false);
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -54,7 +58,26 @@ export default function ProfileScreen() {
     setIsModalVisible(false);
   };
 
-  const handleEditProfilePicture = () => { };
+  const handleEditProfilePicture = () => {
+    setIsProfilePictureVisible(true);
+  };
+
+  const handleCloseProfilePicture = () => {
+    setIsProfilePictureVisible(false);
+  };
+
+  const handleConfirmProfilePicture = async (downloadURL: string) => {
+    if (currentUser?.uid && userInfo) {
+      const success = await updateUserProfile(currentUser.uid, {
+        photoURL: downloadURL,
+      });
+      if (success) {
+        setUserInfo({ ...userInfo, photoURL: downloadURL });
+      }
+    }
+    setIsProfilePictureVisible(false);
+  };
+
   const handleChangePassword = () => {
     setIsChangePasswordVisible(true);
   };
@@ -70,7 +93,10 @@ export default function ProfileScreen() {
     setIsNotificationSettingsVisible(false);
   };
 
-  const handleConfirmNotificationSettings = async (settings: { categories: string[], radius: number }) => {
+  const handleConfirmNotificationSettings = async (settings: {
+    categories: string[];
+    radius: number;
+  }) => {
     if (currentUser?.uid) {
       const success = await updateUserProfile(currentUser.uid, {
         notificationPreferences: settings,
@@ -94,8 +120,8 @@ export default function ProfileScreen() {
               uri: userInfo.photoURL
                 ? userInfo.photoURL
                 : Image.resolveAssetSource(
-                  require("@/assets/images/profile.jpg")
-                ).uri,
+                    require("@/assets/images/profile.jpg")
+                  ).uri,
             }}
             style={styles.profileImage}
           />
@@ -131,7 +157,7 @@ export default function ProfileScreen() {
           />
         </View>
         <View style={styles.button}>
-          <Button title="My Posts" onPress={() => { }} />
+          <Button title="My Posts" onPress={() => {}} />
         </View>
       </View>
       {userInfo && (
@@ -156,6 +182,13 @@ export default function ProfileScreen() {
           onConfirm={handleConfirmNotificationSettings}
           initialCategories={userInfo.notificationPreferences.categories}
           initialRadius={userInfo.notificationPreferences.radius}
+        />
+      )}
+      {userInfo && (
+        <ProfilePictureModal
+          visible={isProfilePictureVisible}
+          onClose={handleCloseProfilePicture}
+          onConfirm={handleConfirmProfilePicture}
         />
       )}
     </View>
