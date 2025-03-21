@@ -156,9 +156,9 @@ export default function ProfileScreen() {
             onPress={handleNotificationSettings}
           />
         </View>
-        <View style={styles.button}>
+        {/*<View style={styles.button}>
           <Button title="My Posts" onPress={() => {}} />
-        </View>
+        </View>*/}
       </View>
       {userInfo && (
         <EditUsernameModal
