@@ -155,9 +155,9 @@ export default function PostScreen() {
       // Upload image to Firebase Storage
       let photoURL = undefined;
 
-      // if (imageUri) {
-      //   photoURL = await uploadImage(imageUri);
-      // }
+      if (imageUri) {
+        photoURL = await uploadImage(imageUri);
+      }
 
 
       const userProfile = await getUserProfile(currentUser.uid);
@@ -174,7 +174,7 @@ export default function PostScreen() {
         },
         authorId: currentUser.uid,
         authorName: currentUser?.displayName || userProfile?.username || "Anonymous",
-        photoURL: "", // Placeholder image
+        photoURL,//: "", // Placeholder image
         isPublic: true,
       };
 

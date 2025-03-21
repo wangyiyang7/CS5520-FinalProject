@@ -33,11 +33,8 @@ export default function RootLayout() {
   // Initialize database when app starts, Do this if only the database is empty and 
   // comment out the code after the database is initialized
   // useEffect(() => {
-  //   // initializeDatabase();
+  //   initializeDatabase();
   // }, []);
-
-
-
 
 
   if (!loaded) {
