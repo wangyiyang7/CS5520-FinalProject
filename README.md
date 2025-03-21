@@ -83,11 +83,6 @@ Our application uses three main collections in Firestore:
 
 
 
-
-
-
-
-
 ## Team Member Contributions
 
 ### Carlos Semeho Edorh's Contributions:
