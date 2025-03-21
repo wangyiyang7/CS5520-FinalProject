@@ -75,9 +75,9 @@ Our application uses three main collections in Firestore:
 | :---------------------------------------------: | :---------------------------------------------: |
 | <img src="./screenshots/posts.jpg" width="250"> | <img src="./screenshots/posts.jpg" width="250"> |
 
-## Team Member Contributions
+# Team Member Contributions
 
-### Carlos Semeho Edorh's Contributions:
+## Carlos Semeho Edorh's Contributions:
 
 - Implemented Firebase services and database structure
 - Created public content components for displaying posts with weather integration
@@ -87,7 +87,7 @@ Our application uses three main collections in Firestore:
 - Integrated weather API for displaying local conditions
 - Set up database initialization with sample data
 
-# A breakdown of Carlos' contibutions
+### A breakdown of Carlos' contibutions
 
 `[Firebase Services]`
 I've implemented several service modules:
@@ -139,9 +139,9 @@ I've implemented complete CRUD operations for posts:
 - Update: Post authors can edit their content
 - Delete: Authors can remove their posts
 
-# Below i have my branches contibutions timeline descriptions for my pull requests
+### Below i have my branches contibutions timeline descriptions for my pull requests
 
-## Work Updates for branch (public-content-for-guess-users) Carlos
+### Work Updates for branch (public-content-for-guess-users) Carlos
 
 1. added Firebase services documentation; outline core utilities and project progress
 2. Firebase Helper file for database transactions
@@ -155,7 +155,7 @@ I've implemented complete CRUD operations for posts:
 7. refactor HomeScreen component to integrate PublicContentHeader and PublicPostsList,
    Commented/Moved unused elements to (<MyWeather />)
 
-## Work Updates for branch (post-details-page) Carlos
+### Work Updates for branch (post-details-page) Carlos
 
 1. Create the Dynamic Route File
    Created a new file called `app/post/[id].tsx`. This creates a dynamic route where `[id]` will be replaced with the actual post ID in the URL, allowing for individual post viewing.
@@ -163,7 +163,7 @@ I've implemented complete CRUD operations for posts:
 1. Modify Post Card Navigation
    Updated the `handlePostPress` function in `PublicPostsList.tsx` to navigate to the detail view when a post is tapped, using Expo Router's navigation with the post ID as a parameter.
 
-## Work Updates for branch (create-new-post) Carlos
+### Work Updates for branch (create-new-post) Carlos
 
 1. Implement Post Creation Form
    Created a comprehensive post creation form with fields for title, content, and category selection, along with camera integration for photos and automatic location capture.
@@ -181,7 +181,7 @@ I've implemented complete CRUD operations for posts:
 4. Implemented Auto-Refresh on Navigation
    Added functionality to automatically refresh the posts list when navigating back from post creation, ensuring newly created content appears immediately.
 
-## Work Updates for branch (edit-delete-like-verify-share-post-functionalities) Carlos
+### Work Updates for branch (edit-delete-like-verify-share-post-functionalities) Carlos
 
 1. Added post interaction capabilities including like, verify, share, edit, and delete functionality, enhancing user engagement with content.
 
@@ -193,7 +193,7 @@ I've implemented complete CRUD operations for posts:
 
 5. Implemented security checks to ensure only post authors can modify or delete their content, maintaining data integrity.
 
-### Yiyang Wang's Contributions by feature branch:
+## Yiyang Wang's Contributions by feature branch:
 
 - [**tab-navigation** ](https://github.com/wangyiyang7/CS5520-FinalProject/pull/1): Established the basic layout for navigation.
 - [**weather-api**](https://github.com/wangyiyang7/CS5520-FinalProject/pull/2): Implemented a prototype to acquire the user's location (latitude and longitude) and fetch the corresponding weather information.
