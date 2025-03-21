@@ -13,10 +13,10 @@ export default function Layout() {
         headerTintColor: "#fff",
         headerTitleStyle: { fontWeight: "bold" },
 
-        headerShown: true,
-        headerBackTitle: "Back",
-        // Make sure iOS shows the back button properly
-        headerBackVisible: true
+        // headerShown: true,
+        // headerBackTitle: "Back",
+        // // Make sure iOS shows the back button properly
+        // headerBackVisible: true
 
       }}
     >
@@ -37,7 +37,24 @@ export default function Layout() {
           ),
         }}
       />
-      <Stack.Screen name="signup" options={{ title: "Sign Up" }} />
+      <Stack.Screen
+
+        name="signup"
+        // options={{ title: "Sign Up" }} 
+
+        options={{
+          title: "Sign Up",
+          headerLeft: () => (
+            <TouchableOpacity
+              onPress={() => router.push("/(tabs)")}
+              style={{ marginLeft: 10 }}
+            >
+              <Ionicons name="arrow-back" size={24} color="white" />
+            </TouchableOpacity>
+          ),
+        }}
+
+      />
     </Stack>
   );
 }
