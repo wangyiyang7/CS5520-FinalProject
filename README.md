@@ -40,7 +40,7 @@ Our application uses three main collections in Firestore:
 ## Current Implementation Status
 
 - Authentication with email/password is implemented with Firebase
-- Users can register, log in, and view their profile information
+- Users can register, log in, view and edit their profile information
 - Public posts feed is available to all users, even when not logged in
 - Post creation form is implemented with photo capture capability
 - Location services integrated for capturing post location
