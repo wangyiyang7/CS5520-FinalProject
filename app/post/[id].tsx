@@ -202,16 +202,16 @@ export default function PostDetailScreen() {
             <Stack.Screen
                 options={{
                     title: post.category || 'Post Detail',
-                    headerRight: () => isAuthor ? (
-                        <View style={styles.headerButtons}>
-                            <TouchableOpacity onPressIn={handleEdit} style={styles.headerButton}>
-                                <Ionicons name="pencil" size={24} color={Colors.light.tint} />
-                            </TouchableOpacity>
-                            <TouchableOpacity onPressIn={handleDelete} style={styles.headerButton}>
-                                <Ionicons name="trash" size={24} color="#FF3B30" />
-                            </TouchableOpacity>
-                        </View>
-                    ) : null
+                    // headerRight: () => isAuthor ? (
+                    //     <View style={styles.headerButtons}>
+                    //         <TouchableOpacity onPressIn={handleEdit} style={styles.headerButton}>
+                    //             <Ionicons name="pencil" size={24} color={Colors.light.tint} />
+                    //         </TouchableOpacity>
+                    //         <TouchableOpacity onPressIn={handleDelete} style={styles.headerButton}>
+                    //             <Ionicons name="trash" size={24} color="#FF3B30" />
+                    //         </TouchableOpacity>
+                    //     </View>
+                    // ) : null
                 }}
             />
 
