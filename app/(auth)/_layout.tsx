@@ -29,7 +29,7 @@ export default function Layout() {
           title: "Login",
           headerLeft: () => (
             <TouchableOpacity
-              onPress={() => router.push("/(tabs)")}
+              onPressIn={() => router.push("/(tabs)")}
               style={{ marginLeft: 10 }}
             >
               <Ionicons name="arrow-back" size={24} color="white" />
@@ -46,7 +46,7 @@ export default function Layout() {
           title: "Sign Up",
           headerLeft: () => (
             <TouchableOpacity
-              onPress={() => router.push("/(tabs)")}
+              onPressIn={() => router.push("/(tabs)")}
               style={{ marginLeft: 10 }}
             >
               <Ionicons name="arrow-back" size={24} color="white" />
