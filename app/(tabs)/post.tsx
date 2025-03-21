@@ -15,7 +15,8 @@ import {
   Alert,
   Image,
   KeyboardAvoidingView,
-  Platform
+  Platform,
+  ActionSheetIOS
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { AuthContext } from "@/components/AuthContext";
@@ -30,6 +31,7 @@ import { ThemedView } from "@/components/ThemedView";
 import { ImageManipulator } from "expo-image-manipulator";
 
 import { getUserProfile } from '@/Firebase/services/UserService';
+import { Ionicons } from "@expo/vector-icons";
 
 
 export default function PostScreen() {
@@ -241,7 +243,7 @@ export default function PostScreen() {
             />
           </View>
 
-          <View style={styles.formGroup}>
+          {/* <View style={styles.formGroup}>
             <ThemedText style={styles.label}>Category</ThemedText>
             <View style={styles.pickerContainer}>
               <Picker
@@ -256,7 +258,58 @@ export default function PostScreen() {
                 <Picker.Item label="Infrastructure" value="Infrastructure" />
               </Picker>
             </View>
+          </View> */}
+
+
+          <View style={styles.formGroup}>
+            <ThemedText style={styles.label}>Category</ThemedText>
+            <View style={styles.pickerContainer}>
+              {Platform.OS === 'ios' ? (
+                <TouchableOpacity
+                  style={styles.iosPicker}
+                  onPress={() => {
+                    // On iOS, we'll use ActionSheetIOS instead
+                    ActionSheetIOS.showActionSheetWithOptions(
+                      {
+                        options: ['Cancel', 'General', 'Traffic', 'Safety', 'Event', 'Infrastructure'],
+                        cancelButtonIndex: 0,
+                        title: 'Select Category'
+                      },
+                      (buttonIndex) => {
+                        if (buttonIndex === 0) {
+                          // Cancel was tapped
+                          return;
+                        }
+                        // Map the button index to your category values (offset by 1 because of Cancel)
+                        const categories = ['General', 'Traffic', 'Safety', 'Event', 'Infrastructure'];
+                        setCategory(categories[buttonIndex - 1]);
+                      }
+                    );
+                  }}
+                >
+                  <ThemedText style={styles.pickerText}>{category}</ThemedText>
+                  <Ionicons name="chevron-down" size={20} color="#777" />
+                </TouchableOpacity>
+              ) : (
+                <Picker
+                  selectedValue={category}
+                  onValueChange={(itemValue) => setCategory(itemValue)}
+                  style={styles.picker}
+                >
+                  <Picker.Item label="General" value="General" />
+                  <Picker.Item label="Traffic" value="Traffic" />
+                  <Picker.Item label="Safety" value="Safety" />
+                  <Picker.Item label="Event" value="Event" />
+                  <Picker.Item label="Infrastructure" value="Infrastructure" />
+                </Picker>
+              )}
+            </View>
           </View>
+
+
+
+
+
 
           <View style={styles.formGroup}>
             <ThemedText style={styles.label}>Content</ThemedText>
@@ -394,5 +447,15 @@ const styles = StyleSheet.create({
     color: "#ffffff",
     fontSize: 18,
     fontWeight: "bold",
-  }
+  },
+  iosPicker: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 12,
+    backgroundColor: '#fff',
+  },
+  pickerText: {
+    fontSize: 16,
+  },
 });
