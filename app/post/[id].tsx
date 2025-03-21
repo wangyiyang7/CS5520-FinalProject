@@ -202,6 +202,7 @@ export default function PostDetailScreen() {
             <Stack.Screen
                 options={{
                     title: post.category || 'Post Detail',
+                    headerBackTitle: 'Back'
                     // headerRight: () => isAuthor ? (
                     //     <View style={styles.headerButtons}>
                     //         <TouchableOpacity onPressIn={handleEdit} style={styles.headerButton}>
