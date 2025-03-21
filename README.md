@@ -65,15 +65,15 @@ Our application uses three main collections in Firestore:
 
 - Screenshot 3: Post creation
 
-|                  Post Creation                  |                  Post Details                   |
-| :---------------------------------------------: | :---------------------------------------------: |
-| <img src="./screenshots/posts.jpg" width="250"> | <img src="./screenshots/posts.jpg" width="250"> |
+|                     Post Creation                     |                      Post Details                      |
+| :---------------------------------------------------: | :----------------------------------------------------: |
+| <img src="./screenshots/create-post.jpg" width="250"> | <img src="./screenshots/post-details.jpg" width="250"> |
 
 - Screenshot 2: Posts feed
 
-|                    Post Page                    |                  Post Details                   |
-| :---------------------------------------------: | :---------------------------------------------: |
-| <img src="./screenshots/posts.jpg" width="250"> | <img src="./screenshots/posts.jpg" width="250"> |
+|                 Post Feed Page                  |
+| :---------------------------------------------: |
+| <img src="./screenshots/posts.jpg" width="250"> |
 
 # Team Member Contributions
 
