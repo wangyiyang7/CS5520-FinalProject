@@ -85,14 +85,14 @@ export default function Alarm() {
     const timeUntilNotification = selectedDate.getTime() - now.getTime();
 
     if (timeUntilNotification > 0) {
-      await Notifications.scheduleNotificationAsync({
+      const identifier = await Notifications.scheduleNotificationAsync({
         content: {
           title: "Notification",
           body: alarmMessage || "It's time!",
           sound: true,
         },
         trigger: {
-          channelId: "notifications",
+          type: SchedulableTriggerInputTypes.TIME_INTERVAL,
           seconds: Math.floor(timeUntilNotification / 1000),
           repeats: false,
         },
@@ -101,6 +101,7 @@ export default function Alarm() {
         "Notification scheduled in seconds:",
         `${timeUntilNotification / 1000}`
       );
+      await Notifications.cancelScheduledNotificationAsync(identifier);
     } else {
       alert("Please select a future date and time");
     }
