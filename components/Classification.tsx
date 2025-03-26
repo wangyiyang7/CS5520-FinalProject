@@ -33,7 +33,7 @@ export const classifyText = async (text: string): Promise<string> => {
     // Map Google’s categories to your custom ones
     if (categories.length > 0) {
       const categoryName = categories[0].name?.toLowerCase() || "";
-
+      console.log(categoryName);
       // Entertainment & Culture
       if (
         categoryName.includes("arts") ||
@@ -42,7 +42,15 @@ export const classifyText = async (text: string): Promise<string> => {
         categoryName.includes("performing") ||
         categoryName.includes("festival") ||
         categoryName.includes("hobbies") ||
-        categoryName.includes("leisure")
+        categoryName.includes("leisure") ||
+        categoryName.includes("games") ||
+        categoryName.includes("shopping") ||
+        categoryName.includes("fashion") ||
+        categoryName.includes("internet") ||
+        categoryName.includes("telecom") ||
+        categoryName.includes("computer") ||
+        categoryName.includes("electronics") ||
+        categoryName.includes("social media")
       ) {
         matchedBucket = "Entertainment & Culture";
       }
@@ -51,7 +59,8 @@ export const classifyText = async (text: string): Promise<string> => {
         categoryName.includes("sports") ||
         categoryName.includes("game") ||
         categoryName.includes("recreation") ||
-        categoryName.includes("fitness")
+        categoryName.includes("fitness") ||
+        categoryName.includes("exercise")
       ) {
         matchedBucket = "Sports & Activities";
       }
@@ -62,9 +71,17 @@ export const classifyText = async (text: string): Promise<string> => {
         categoryName.includes("government") ||
         categoryName.includes("politics") ||
         categoryName.includes("safety") ||
+        categoryName.includes("sensitive") ||
+        categoryName.includes("violence") ||
+        categoryName.includes("abuse") ||
+        categoryName.includes("disaster") ||
         categoryName.includes("accident") ||
         categoryName.includes("crash") ||
-        categoryName.includes("protest")
+        categoryName.includes("protest") ||
+        categoryName.includes("science") ||
+        categoryName.includes("earth") ||
+        categoryName.includes("jobs") ||
+        categoryName.includes("education")
       ) {
         matchedBucket = "News & Incidents";
       }
@@ -77,6 +94,10 @@ export const classifyText = async (text: string): Promise<string> => {
         categoryName.includes("people") ||
         categoryName.includes("society") ||
         categoryName.includes("social") ||
+        categoryName.includes("family") ||
+        categoryName.includes("relationships") ||
+        categoryName.includes("home") ||
+        categoryName.includes("garden") ||
         categoryName.includes("market")
       ) {
         matchedBucket = "Food & Social";
@@ -88,7 +109,10 @@ export const classifyText = async (text: string): Promise<string> => {
         categoryName.includes("traffic") ||
         categoryName.includes("weather") ||
         categoryName.includes("environment") ||
-        categoryName.includes("destination")
+        categoryName.includes("destination") ||
+        categoryName.includes("autos") ||
+        categoryName.includes("vehicle") ||
+        categoryName.includes("finance")
       ) {
         matchedBucket = "Travel & Environment";
       }
