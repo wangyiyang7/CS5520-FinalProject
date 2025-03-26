@@ -3,7 +3,7 @@ const API_URL = `https://language.googleapis.com/v2/documents:classifyText?key=$
 export const classifyText = async (text: string): Promise<string> => {
   // console.log(API_URL);
   if (text.length < 20) {
-    return "Text too short"; // API requires at least 20 characters
+    return "Alert! Text too short"; // API requires at least 20 characters
   }
 
   const requestBody = {
