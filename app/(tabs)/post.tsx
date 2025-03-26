@@ -16,7 +16,8 @@ import {
   Image,
   KeyboardAvoidingView,
   Platform,
-  ActionSheetIOS
+  ActionSheetIOS,
+  Button
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { AuthContext } from "@/components/AuthContext";
@@ -32,6 +33,7 @@ import { ImageManipulator } from "expo-image-manipulator";
 
 import { getUserProfile } from '@/Firebase/services/UserService';
 import { Ionicons } from "@expo/vector-icons";
+import  {classifyText}  from '@/components/Classification';
 
 
 export default function PostScreen() {
@@ -39,7 +41,7 @@ export default function PostScreen() {
   const { currentUser } = useContext(AuthContext);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [category, setCategory] = useState("General");
+  const [category, setCategory] = useState("");
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [locationName, setLocationName] = useState("Unknown location");
@@ -51,7 +53,7 @@ export default function PostScreen() {
 
     if (currentUser) {
 
-      console.log("User is logged in", currentUser);
+      // console.log("User is logged in", currentUser);
 
       // Request location permissions when component mounts
       (async () => {
@@ -223,6 +225,11 @@ export default function PostScreen() {
     );
   }
 
+  const handleClassify = async () => {
+    const result = await classifyText(content);
+    setCategory(result);
+  };
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -260,7 +267,7 @@ export default function PostScreen() {
             </View>
           </View> */}
 
-
+{/*
           <View style={styles.formGroup}>
             <ThemedText style={styles.label}>Category</ThemedText>
             <View style={styles.pickerContainer}>
@@ -306,7 +313,7 @@ export default function PostScreen() {
             </View>
           </View>
 
-
+*/ }
 
 
 
@@ -323,7 +330,10 @@ export default function PostScreen() {
               textAlignVertical="top"
             />
           </View>
-
+<View>
+          <Button title="Classify" onPress={handleClassify} />
+      {category ? <Text>Category: {category}</Text> : null}
+</View>
           <View style={styles.formGroup}>
             <ThemedText style={styles.label}>Location</ThemedText>
             <View style={styles.locationContainer}>
