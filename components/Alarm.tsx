@@ -21,7 +21,32 @@ export default function Alarm() {
   const [alarmMessage, setAlarmMessage] = useState("");
 
   useEffect(() => {
-    Notifications.requestPermissionsAsync();
+    const setupNotifications = async () => {
+      try {
+        await Notifications.requestPermissionsAsync();
+        await Notifications.setNotificationChannelAsync("default", {
+          name: "default",
+          importance: Notifications.AndroidImportance.MAX,
+        });
+      } catch (e) {}
+
+      // Configure notification handler
+      Notifications.setNotificationHandler({
+        handleNotification: async () => ({
+          shouldShowAlert: true,
+          shouldPlaySound: true,
+          shouldSetBadge: false,
+        }),
+      });
+    };
+
+    setupNotifications();
+
+    // Optional: Cleanup function
+    return () => {
+      // Cancel all notifications when component unmounts
+      Notifications.cancelAllScheduledNotificationsAsync();
+    };
   }, []);
 
   const openModal = () => {
@@ -78,33 +103,27 @@ export default function Alarm() {
 
   const setNotification = async () => {
     closeModal();
+    try {
+      await Notifications.cancelAllScheduledNotificationsAsync();
 
-    await Notifications.cancelAllScheduledNotificationsAsync();
-
-    const now = new Date();
-    const timeUntilNotification = selectedDate.getTime() - now.getTime();
-
-    if (timeUntilNotification > 0) {
-      const identifier = await Notifications.scheduleNotificationAsync({
-        content: {
-          title: "Notification",
-          body: alarmMessage || "It's time!",
-          sound: true,
-        },
-        trigger: {
-          type: SchedulableTriggerInputTypes.TIME_INTERVAL,
-          seconds: Math.floor(timeUntilNotification / 1000),
-          repeats: false,
-        },
-      });
-      console.log(
-        "Notification scheduled in seconds:",
-        `${timeUntilNotification / 1000}`
-      );
-      await Notifications.cancelScheduledNotificationAsync(identifier);
-    } else {
-      alert("Please select a future date and time");
-    }
+      const now = new Date();
+      if (selectedDate.getTime() - now.getTime() > 0) {
+        const identifier = await Notifications.scheduleNotificationAsync({
+          content: {
+            title: "Notification",
+            body: alarmMessage || "It's time!",
+            sound: true,
+          },
+          trigger: {
+            type: SchedulableTriggerInputTypes.DATE,
+            date: selectedDate.getTime(),
+          },
+        });
+        console.log(selectedDate.getTime());
+      } else {
+        alert("Please select a future date and time");
+      }
+    } catch (e) {}
   };
 
   const formatDate = (date: Date) => {
