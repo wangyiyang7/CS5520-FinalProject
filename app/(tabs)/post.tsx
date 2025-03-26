@@ -17,24 +17,23 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActionSheetIOS,
-  Button
+  Button,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { AuthContext } from "@/components/AuthContext";
 import { useRouter } from "expo-router";
 import { createPost } from "@/Firebase/services/PostService";
-import * as ImagePicker from 'expo-image-picker';
-import * as Location from 'expo-location';
+import * as ImagePicker from "expo-image-picker";
+import * as Location from "expo-location";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { Colors } from "@/constants/Colors";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { ImageManipulator } from "expo-image-manipulator";
 
-import { getUserProfile } from '@/Firebase/services/UserService';
+import { getUserProfile } from "@/Firebase/services/UserService";
 import { Ionicons } from "@expo/vector-icons";
-import  {classifyText}  from '@/components/Classification';
-
+import { classifyText } from "@/components/Classification";
 
 export default function PostScreen() {
   const router = useRouter();
@@ -43,23 +42,27 @@ export default function PostScreen() {
   const [content, setContent] = useState("");
   const [category, setCategory] = useState("");
   const [imageUri, setImageUri] = useState<string | null>(null);
-  const [location, setLocation] = useState<Location.LocationObject | null>(null);
+  const [location, setLocation] = useState<Location.LocationObject | null>(
+    null
+  );
   const [locationName, setLocationName] = useState("Unknown location");
   const [loading, setLoading] = useState(false);
-  const [cameraPermission, requestCameraPermission] = ImagePicker.useCameraPermissions();
+  const [cameraPermission, requestCameraPermission] =
+    ImagePicker.useCameraPermissions();
 
   // Check if user is logged in
   useEffect(() => {
-
     if (currentUser) {
-
       // console.log("User is logged in", currentUser);
 
       // Request location permissions when component mounts
       (async () => {
         const { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== "granted") {
-          Alert.alert("Permission Denied", "Location permission is needed to create posts.");
+          Alert.alert(
+            "Permission Denied",
+            "Location permission is needed to create posts."
+          );
           return;
         }
 
@@ -70,7 +73,7 @@ export default function PostScreen() {
           // Get location name
           const reverseGeocode = await Location.reverseGeocodeAsync({
             latitude: currentLocation.coords.latitude,
-            longitude: currentLocation.coords.longitude
+            longitude: currentLocation.coords.longitude,
           });
 
           if (reverseGeocode.length > 0) {
@@ -78,8 +81,10 @@ export default function PostScreen() {
             const locationString = [
               address.street,
               address.city,
-              address.region
-            ].filter(Boolean).join(", ");
+              address.region,
+            ]
+              .filter(Boolean)
+              .join(", ");
 
             setLocationName(locationString || "Unknown location");
           }
@@ -96,7 +101,10 @@ export default function PostScreen() {
     if (!cameraPermission?.granted) {
       const permission = await requestCameraPermission();
       if (!permission.granted) {
-        Alert.alert("Permission Denied", "Camera permission is needed to take photos.");
+        Alert.alert(
+          "Permission Denied",
+          "Camera permission is needed to take photos."
+        );
         return;
       }
     }
@@ -155,7 +163,6 @@ export default function PostScreen() {
     setLoading(true);
 
     try {
-
       // Upload image to Firebase Storage
       let photoURL = undefined;
 
@@ -163,9 +170,7 @@ export default function PostScreen() {
         photoURL = await uploadImage(imageUri);
       }
 
-
       const userProfile = await getUserProfile(currentUser.uid);
-
 
       const postData = {
         title,
@@ -177,8 +182,9 @@ export default function PostScreen() {
           longitude: location.coords.longitude,
         },
         authorId: currentUser.uid,
-        authorName: currentUser?.displayName || userProfile?.username || "Anonymous",
-        photoURL,//: "", // Placeholder image
+        authorName:
+          currentUser?.displayName || userProfile?.username || "Anonymous",
+        photoURL, //: "", // Placeholder image
         isPublic: true,
       };
 
@@ -188,22 +194,23 @@ export default function PostScreen() {
         Alert.alert("Success", "Your post has been created successfully!", [
           {
             text: "View Post",
-            onPress: () => router.push({
-              pathname: "/post/[id]",
-              params: { id: postId }
-            })
+            onPress: () =>
+              router.push({
+                pathname: "/post/[id]",
+                params: { id: postId },
+              }),
           },
           {
             text: "Back to Home",
             // onPress: () => router.push("/(tabs)")
-            onPress: () => router.replace("/(tabs)")
-          }
+            onPress: () => router.replace("/(tabs)"),
+          },
         ]);
 
         // Reset form
         setTitle("");
         setContent("");
-        setCategory("General");
+        setCategory("");
         setImageUri(null);
       } else {
         Alert.alert("Error", "Failed to create post. Please try again.");
@@ -267,7 +274,7 @@ export default function PostScreen() {
             </View>
           </View> */}
 
-{/*
+          {/*
           <View style={styles.formGroup}>
             <ThemedText style={styles.label}>Category</ThemedText>
             <View style={styles.pickerContainer}>
@@ -313,10 +320,7 @@ export default function PostScreen() {
             </View>
           </View>
 
-*/ }
-
-
-
+*/}
 
           <View style={styles.formGroup}>
             <ThemedText style={styles.label}>Content</ThemedText>
@@ -330,14 +334,20 @@ export default function PostScreen() {
               textAlignVertical="top"
             />
           </View>
-<View>
-          <Button title="Classify" onPress={handleClassify} />
-      {category ? <Text>Category: {category}</Text> : null}
-</View>
+          <View>
+            <Button title="AI POWER!" onPress={handleClassify} />
+            {category ? (
+              <ThemedText style={[styles.formGroup, styles.label]}>
+                Category: {category}
+              </ThemedText>
+            ) : null}
+          </View>
           <View style={styles.formGroup}>
             <ThemedText style={styles.label}>Location</ThemedText>
             <View style={styles.locationContainer}>
-              <ThemedText style={styles.locationText}>📍 {locationName}</ThemedText>
+              <ThemedText style={styles.locationText}>
+                📍 {locationName}
+              </ThemedText>
             </View>
           </View>
 
@@ -459,11 +469,11 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   iosPicker: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     padding: 12,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   pickerText: {
     fontSize: 16,
