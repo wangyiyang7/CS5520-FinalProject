@@ -119,7 +119,10 @@ export default function Alarm() {
             date: selectedDate.getTime(),
           },
         });
-        console.log(selectedDate.getTime());
+        console.log(
+          "Notification sets off at Unix epoch time:",
+          selectedDate.getTime()
+        );
       } else {
         alert("Please select a future date and time");
       }
