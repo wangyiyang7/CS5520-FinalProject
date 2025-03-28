@@ -1,23 +1,29 @@
 const API_URL = `https://language.googleapis.com/v2/documents:classifyText?key=${process.env.EXPO_PUBLIC_google}`;
 
 export const classifyText = async (text: string): Promise<string> => {
+
   // console.log(API_URL);
   if (text.length < 20) {
     return "Alert! Text too short"; // API requires at least 20 characters
+
   }
 
   const requestBody = {
     document: {
+
       type: "PLAIN_TEXT",
+
       content: text,
     },
   };
 
   try {
     const response = await fetch(API_URL, {
+
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+
       },
       body: JSON.stringify(requestBody),
     });
@@ -28,6 +34,7 @@ export const classifyText = async (text: string): Promise<string> => {
 
     const data = await response.json();
     const categories = data.categories || [];
+
     let matchedBucket = "Other";
 
     // Map Google’s categories to your custom ones
@@ -124,3 +131,4 @@ export const classifyText = async (text: string): Promise<string> => {
     return "Other";
   }
 };
+

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Modal,
   View,
@@ -6,21 +6,51 @@ import {
   TouchableOpacity,
   StyleSheet,
   Platform,
+  TextInput,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Ionicons } from "@expo/vector-icons";
+import * as Notifications from "expo-notifications";
+import { SchedulableTriggerInputTypes } from "expo-notifications";
 
 export default function Alarm() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [modalVisible, setModalVisible] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
-  const [alarmActive, setAlarmActive] = useState(false);
-  const [alarmTimeout, setAlarmTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [alarmMessage, setAlarmMessage] = useState("");
+
+  useEffect(() => {
+    const setupNotifications = async () => {
+      try {
+        await Notifications.requestPermissionsAsync();
+        await Notifications.setNotificationChannelAsync("default", {
+          name: "default",
+          importance: Notifications.AndroidImportance.MAX,
+        });
+      } catch (e) {}
+
+      // Configure notification handler
+      Notifications.setNotificationHandler({
+        handleNotification: async () => ({
+          shouldShowAlert: true,
+          shouldPlaySound: true,
+          shouldSetBadge: false,
+        }),
+      });
+    };
+
+    setupNotifications();
+
+    // Optional: Cleanup function
+    return () => {
+      // Cancel all notifications when component unmounts
+      Notifications.cancelAllScheduledNotificationsAsync();
+    };
+  }, []);
 
   const openModal = () => {
     setModalVisible(true);
-    // Initialize with current date/time
     setSelectedDate(new Date());
     if (Platform.OS === "ios") {
       setShowDatePicker(true);
@@ -39,7 +69,6 @@ export default function Alarm() {
       const currentTime = selectedDate;
       if (Platform.OS === "android") {
         setShowDatePicker(false);
-        // Keep the current time when changing date
         date.setHours(currentTime.getHours());
         date.setMinutes(currentTime.getMinutes());
       }
@@ -52,14 +81,17 @@ export default function Alarm() {
       const updatedDate = new Date(selectedDate);
       if (Platform.OS === "android") {
         setShowTimePicker(false);
-        // Keep the current date when changing time
         updatedDate.setHours(time.getHours());
         updatedDate.setMinutes(time.getMinutes());
+        updatedDate.setSeconds(0);
+        updatedDate.setMilliseconds(0);
       } else {
-        // For iOS, the date picker returns a full date & time
         updatedDate.setHours(time.getHours());
         updatedDate.setMinutes(time.getMinutes());
+        updatedDate.setSeconds(0);
+        updatedDate.setMilliseconds(0);
       }
+      console.log("updatedDate:", updatedDate);
       setSelectedDate(updatedDate);
     }
   };
@@ -72,49 +104,32 @@ export default function Alarm() {
     setShowTimePicker(true);
   };
 
-  const setAlarm = () => {
+  const setNotification = async () => {
     closeModal();
+    try {
+      await Notifications.cancelAllScheduledNotificationsAsync();
 
-    // Clear any existing alarm
-    if (alarmTimeout) {
-      clearTimeout(alarmTimeout);
-    }
-
-    const now = new Date();
-    const timeUntilAlarm = selectedDate.getTime() - now.getTime();
-
-    // Only set alarm if it's in the future
-    if (timeUntilAlarm > 0) {
-      setAlarmActive(true);
-
-      // Set up the alarm timeout
-      const timeout = setTimeout(() => {
-        triggerAlarm();
-      }, timeUntilAlarm);
-
-      setAlarmTimeout(timeout);
-      /*
-      if (onAlarmSet) {
-        onAlarmSet(selectedDate);
-      }*/
-    } else {
-      // Handle case where selected time is in the past
-      alert("Please select a future date and time");
-    }
-  };
-
-  const triggerAlarm = () => {
-    setAlarmActive(true);
-    // Show alarm modal
-    setModalVisible(true);
-  };
-
-  const dismissAlarm = () => {
-    setAlarmActive(false);
-    setModalVisible(false);
-    /*if (onAlarmDismiss) {
-      onAlarmDismiss();
-    }*/
+      const now = new Date();
+      if (selectedDate.getTime() - now.getTime() > 0) {
+        const identifier = await Notifications.scheduleNotificationAsync({
+          content: {
+            title: "Notification",
+            body: alarmMessage || "It's time!",
+            sound: true,
+          },
+          trigger: {
+            type: SchedulableTriggerInputTypes.DATE,
+            date: selectedDate.getTime(),
+          },
+        });
+        console.log(
+          "Notification sets off at Unix epoch time:",
+          selectedDate.getTime()
+        );
+      } else {
+        alert("Please select a future date and time");
+      }
+    } catch (e) {}
   };
 
   const formatDate = (date: Date) => {
@@ -139,16 +154,6 @@ export default function Alarm() {
         <Ionicons name="notifications" size={24} color="black" />
       </TouchableOpacity>
 
-      {alarmActive && (
-        <View style={styles.activeAlarmContainer}>
-          <Text style={styles.activeAlarmText}>
-            Alarm set for: {formatDate(selectedDate)} at{" "}
-            {formatTime(selectedDate)}
-          </Text>
-        </View>
-      )}
-
-      {/* Alarm setting modal */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -157,91 +162,76 @@ export default function Alarm() {
       >
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
-            {alarmActive && (
-              // Alarm triggered view
+            <Text style={styles.modalTitle}>Set Notification</Text>
+
+            <TextInput
+              style={styles.input}
+              placeholder="Enter notification message"
+              value={alarmMessage}
+              onChangeText={setAlarmMessage}
+              multiline
+            />
+
+            {Platform.OS === "android" ? (
               <View>
-                <Text style={styles.alarmTitle}>Alarm!</Text>
-                <Text style={styles.alarmText}>
-                  It's {formatTime(new Date())}
-                </Text>
-                <TouchableOpacity
-                  style={[styles.button, styles.dismissButton]}
-                  onPress={dismissAlarm}
-                >
-                  <Text style={styles.buttonText}>Dismiss</Text>
-                </TouchableOpacity>
-              </View>
-            )}
+                <View style={styles.dateTimeDisplay}>
+                  <TouchableOpacity onPress={showAndroidDatePicker}>
+                    <Text style={styles.dateTimeText}>
+                      Date: {formatDate(selectedDate)}
+                    </Text>
+                  </TouchableOpacity>
 
-            {!alarmActive && (
-              // Alarm setting view
-              <View>
-                <Text style={styles.modalTitle}>Set Alarm</Text>
+                  <TouchableOpacity onPress={showAndroidTimePicker}>
+                    <Text style={styles.dateTimeText}>
+                      Time: {formatTime(selectedDate)}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
 
-                {Platform.OS === "android" ? (
-                  // Android date/time picker logic
-                  <View>
-                    <View style={styles.dateTimeDisplay}>
-                      <TouchableOpacity onPress={showAndroidDatePicker}>
-                        <Text style={styles.dateTimeText}>
-                          Date: {formatDate(selectedDate)}
-                        </Text>
-                      </TouchableOpacity>
-
-                      <TouchableOpacity onPress={showAndroidTimePicker}>
-                        <Text style={styles.dateTimeText}>
-                          Time: {formatTime(selectedDate)}
-                        </Text>
-                      </TouchableOpacity>
-                    </View>
-
-                    {showDatePicker && (
-                      <DateTimePicker
-                        value={selectedDate}
-                        mode="date"
-                        display="default"
-                        onChange={handleDateChange}
-                      />
-                    )}
-
-                    {showTimePicker && (
-                      <DateTimePicker
-                        value={selectedDate}
-                        mode="time"
-                        display="default"
-                        onChange={handleTimeChange}
-                        is24Hour={false}
-                      />
-                    )}
-                  </View>
-                ) : (
-                  // iOS date/time picker
+                {showDatePicker && (
                   <DateTimePicker
                     value={selectedDate}
-                    mode="datetime"
-                    display="spinner"
+                    mode="date"
+                    display="default"
                     onChange={handleDateChange}
-                    style={styles.iOSPicker}
                   />
                 )}
 
-                <View style={styles.buttonRow}>
-                  <TouchableOpacity
-                    style={[styles.button, styles.cancelButton]}
-                    onPress={closeModal}
-                  >
-                    <Text style={styles.buttonText}>Cancel</Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={[styles.button, styles.setButton]}
-                    onPress={setAlarm}
-                  >
-                    <Text style={styles.buttonText}>Set</Text>
-                  </TouchableOpacity>
-                </View>
+                {showTimePicker && (
+                  <DateTimePicker
+                    value={selectedDate}
+                    mode="time"
+                    display="default"
+                    onChange={handleTimeChange}
+                    is24Hour={false}
+                  />
+                )}
               </View>
+            ) : (
+              <DateTimePicker
+                value={selectedDate}
+                mode="datetime"
+                display="spinner"
+                onChange={handleDateChange}
+                style={styles.iOSPicker}
+              />
             )}
+
+            <View style={styles.buttonRow}>
+              <TouchableOpacity
+                style={[styles.button, styles.cancelButton]}
+                onPress={closeModal}
+              >
+                <Text style={styles.buttonText}>Cancel</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.button, styles.setButton]}
+                onPress={setNotification}
+              >
+                <Text style={styles.buttonText}>Set</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
@@ -315,31 +305,18 @@ const styles = StyleSheet.create({
     flex: 1,
     marginLeft: 5,
   },
-  dismissButton: {
-    backgroundColor: "#F44336",
-    width: "100%",
-  },
   iOSPicker: {
     width: 300,
     height: 200,
   },
-  activeAlarmContainer: {
-    backgroundColor: "#E3F2FD",
-    padding: 10,
+  input: {
+    height: 80,
+    borderColor: "#ddd",
+    borderWidth: 1,
     borderRadius: 5,
-    marginTop: 10,
-  },
-  activeAlarmText: {
-    color: "#0D47A1",
-  },
-  alarmTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#F44336",
-    marginBottom: 10,
-  },
-  alarmText: {
-    fontSize: 18,
-    marginBottom: 20,
+    paddingHorizontal: 10,
+    marginBottom: 15,
+    width: "100%",
+    textAlignVertical: "top",
   },
 });
