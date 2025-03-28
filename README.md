@@ -168,17 +168,21 @@ I've implemented complete CRUD operations for posts:
 1. Implement Post Creation Form
    Created a comprehensive post creation form with fields for title, content, and category selection, along with camera integration for photos and automatic location capture.
 
+2. I have Ehanced both post creation page and edit page to automatically get the Post categories based on the Cloud Natural Language API
+   For Category classification that my colleague provided as the AI API usage by replacing the button to get the categories instead 
+   to use the content state to trigger the category generation.
+
    <!-- Please Note -->
 
 `I am skipping the image URI link during the post creation for now because of firestore billing issues i am trying to recolve`
 
-2. Added Form Validation and Error Handling
+1. Added Form Validation and Error Handling
    Implemented proper validation for form fields and error handling for post creation, ensuring users receive clear feedback during the submission process.
 
-3. Configure Post Creation in Firebase
+2. Configure Post Creation in Firebase
    Set up the connection to Firestore for saving new posts with proper data structure, allowing authenticated users to contribute content to the community feed.
 
-4. Implemented Auto-Refresh on Navigation
+3. Implemented Auto-Refresh on Navigation
    Added functionality to automatically refresh the posts list when navigating back from post creation, ensuring newly created content appears immediately.
 
 ### Work Updates for branch (edit-delete-like-verify-share-post-functionalities) Carlos
@@ -192,6 +196,20 @@ I've implemented complete CRUD operations for posts:
 4. Added native share functionality enabling users to easily share post content with others through device-native sharing options.
 
 5. Implemented security checks to ensure only post authors can modify or delete their content, maintaining data integrity.
+
+
+### Work Updates for branch (interactive-map-view) Carlos
+
+1. Implemented interactive map view with custom markers, allowing users to explore posts geographically with a sliding panel interface for post previews
+   
+2. Created MapController component to provide filtering functionality by category, improving user experience when navigating posts
+   
+3. Enhanced both post creation and edit screens to automatically generate categories based on content changes using the Google Cloud Natural Language API that was initially integrated by my colleague as our AI API integration.
+   
+4. Created a useClassification Hook as an extention from my colleague Classification Procedures to expand category recognition to be 
+   reusable in other components.
+
+
 
 ## Yiyang Wang's Contributions by feature branch:
 
