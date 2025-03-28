@@ -42,21 +42,23 @@ const NotificationSettingsModal: React.FC<NotificationSettingsModalProps> = ({
             <Text style={styles.description}>
               Select categories for push notifications:
             </Text>
-            {["Traffic", "Safety", "Event", "Infrastructure", "General"].map(
-              (category) => (
-                <View key={category} style={styles.checkbox}>
-                  <Checkbox
-                    style={styles.checkbox}
-                    value={categories.includes(category)}
-                    onValueChange={() => toggleCategory(category)}
-                    color={
-                      categories.includes(category) ? "#4630EB" : undefined
-                    }
-                  />
-                  <Text style={styles.checkboxLabel}>{category}</Text>
-                </View>
-              )
-            )}
+            {[
+              "Entertainment & Culture",
+              "Sports & Activities",
+              "News & Incidents",
+              "Food & Social",
+              "Travel & Environment",
+            ].map((category) => (
+              <View key={category} style={styles.checkbox}>
+                <Checkbox
+                  style={styles.checkbox}
+                  value={categories.includes(category)}
+                  onValueChange={() => toggleCategory(category)}
+                  color={categories.includes(category) ? "#4630EB" : undefined}
+                />
+                <Text style={styles.checkboxLabel}>{category}</Text>
+              </View>
+            ))}
           </View>
           <Text style={styles.description}>
             Receive notifications within (km):
