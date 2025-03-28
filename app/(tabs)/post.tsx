@@ -35,12 +35,14 @@ import { getUserProfile } from "@/Firebase/services/UserService";
 import { Ionicons } from "@expo/vector-icons";
 import { classifyText } from "@/components/Classification";
 
+import { useClassification } from '@/hooks/useClassification';
+
 export default function PostScreen() {
   const router = useRouter();
   const { currentUser } = useContext(AuthContext);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [category, setCategory] = useState("");
+  // const [category, setCategory] = useState("");
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [location, setLocation] = useState<Location.LocationObject | null>(
     null
@@ -49,6 +51,11 @@ export default function PostScreen() {
   const [loading, setLoading] = useState(false);
   const [cameraPermission, requestCameraPermission] =
     ImagePicker.useCameraPermissions();
+
+
+  // const { category, isClassifying, error, classify } = useClassification();
+  const { category, isClassifying, error, handleTextChange } = useClassification(true);
+
 
   // Check if user is logged in
   useEffect(() => {
@@ -139,7 +146,7 @@ export default function PostScreen() {
   };
 
   // Handle post submission
-  const handleSubmit = async () => {
+  const handleSubmit_ = async () => {
     if (!currentUser) {
       Alert.alert("Error", "You must be logged in to create a post.");
       return;
@@ -210,7 +217,7 @@ export default function PostScreen() {
         // Reset form
         setTitle("");
         setContent("");
-        setCategory("");
+        // setCategory("");
         setImageUri(null);
       } else {
         Alert.alert("Error", "Failed to create post. Please try again.");
@@ -223,6 +230,96 @@ export default function PostScreen() {
     }
   };
 
+
+
+  const handleSubmit = async () => {
+    if (!currentUser) {
+      Alert.alert("Error", "You must be logged in to create a post.");
+      return;
+    }
+
+    if (!title.trim()) {
+      Alert.alert("Error", "Please enter a title for your post.");
+      return;
+    }
+
+    if (!content.trim()) {
+      Alert.alert("Error", "Please enter content for your post.");
+      return;
+    }
+
+    if (!location) {
+      Alert.alert("Error", "Location is required for creating a post.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const userProfile = await getUserProfile(currentUser.uid);
+
+      const postData = {
+        title,
+        content,
+        category,
+        locationName,
+        location: {
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+        },
+        authorId: currentUser.uid,
+        authorName:
+          currentUser?.displayName || userProfile?.username || "Anonymous",
+        isPublic: true,
+        photoURL: "",
+      };
+
+      // Only add photoURL if we have an image
+      if (imageUri) {
+        const photoURL = await uploadImage(imageUri);
+        postData.photoURL = photoURL;
+      }
+
+
+      const postId = await createPost(postData);
+
+      if (postId) {
+        Alert.alert("Success", "Your post has been created successfully!", [
+          {
+            text: "View Post",
+            onPress: () =>
+              router.push({
+                pathname: "/post/[id]",
+                params: { id: postId },
+              }),
+          },
+          {
+            text: "Back to Home",
+            // onPress: () => router.push("/(tabs)")
+            onPress: () => router.replace("/(tabs)"),
+          },
+        ]);
+
+        // Reset form
+        setTitle("");
+        setContent("");
+        // setCategory("");
+        setImageUri(null);
+      } else {
+        Alert.alert("Error", "Failed to create post. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error creating post:", error);
+      Alert.alert("Error", "An error occurred while creating your post.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+
+
+
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -234,7 +331,7 @@ export default function PostScreen() {
 
   const handleClassify = async () => {
     const result = await classifyText(content);
-    setCategory(result);
+    // setCategory(result);
   };
 
   return (
@@ -322,7 +419,7 @@ export default function PostScreen() {
 
 */}
 
-          <View style={styles.formGroup}>
+          {/* <View style={styles.formGroup}>
             <ThemedText style={styles.label}>Content</ThemedText>
             <TextInput
               style={[styles.input, styles.textArea]}
@@ -333,14 +430,79 @@ export default function PostScreen() {
               numberOfLines={5}
               textAlignVertical="top"
             />
+          </View> */}
+
+
+          <View style={styles.formGroup}>
+            <ThemedText style={styles.label}>Content</ThemedText>
+            <TextInput
+              style={[styles.input, styles.textArea]}
+              value={content}
+              onChangeText={(text) => {
+                setContent(text);
+                handleTextChange(text);
+              }}
+              placeholder="Describe what's happening..."
+              multiline
+              numberOfLines={5}
+              textAlignVertical="top"
+            />
           </View>
+
+
+
+
+
+
+
+
           <View>
-            <Button title="AI POWER!" onPress={handleClassify} />
-            {category ? (
+            {/* <Button title="AI POWER!" onPress={handleClassify} /> */}
+
+
+
+
+            {/* <Button
+              title={isClassifying ? "Classifying..." : "Classify Text"}
+              onPress={() => classify(content)}
+              disabled={isClassifying || content.length < 20}
+            />
+
+            {error && <Text style={styles.errorText}>{error}</Text>}
+
+            {category && (
+              <Text style={styles.categoryText}>
+                Detected Category: {category}
+              </Text>
+            )} */}
+
+
+            {isClassifying ? (
+              <View style={styles.classificationStatus}>
+                <ActivityIndicator size="small" color={Colors.light.tint} />
+                <ThemedText style={styles.classifyingText}>Analyzing content...</ThemedText>
+              </View>
+            ) : (
+              content.length >= 20 && category ? (
+                <ThemedText style={[styles.formGroup, styles.categoryText]}>
+                  Category: {category}
+                </ThemedText>
+              ) : content.length > 0 && content.length < 20 ? (
+                <ThemedText style={[styles.formGroup, styles.hintText]}>
+                  Add {20 - content.length} more characters for automatic classification
+                </ThemedText>
+              ) : null
+            )}
+
+
+            {/* {category ? (
               <ThemedText style={[styles.formGroup, styles.label]}>
                 Category: {category}
               </ThemedText>
-            ) : null}
+            ) : null} */}
+
+
+
           </View>
           <View style={styles.formGroup}>
             <ThemedText style={styles.label}>Location</ThemedText>
@@ -478,4 +640,60 @@ const styles = StyleSheet.create({
   pickerText: {
     fontSize: 16,
   },
+  // categoryText: {
+  //   fontSize: 16,
+  //   fontWeight: '500',
+  //   color: '#333',
+  //   marginTop: 8,
+  //   marginBottom: 16,
+  //   padding: 8,
+  //   backgroundColor: '#f0f0f0',
+  //   borderRadius: 6,
+  // },
+
+
+  categoryText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#333',
+    marginTop: 0,
+    marginBottom: 16,
+    padding: 8,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 6,
+  },
+  errorText: {
+    fontSize: 14,
+    color: '#FF3B30',
+    marginTop: 4,
+    marginBottom: 8,
+  },
+
+
+
+
+
+
+  classificationStatus: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  classifyingText: {
+    marginLeft: 8,
+    fontSize: 14,
+    color: '#666',
+  },
+
+  hintText: {
+    fontSize: 14,
+    color: '#666',
+    fontStyle: 'italic',
+  },
+
+
+
+
+
+
 });
