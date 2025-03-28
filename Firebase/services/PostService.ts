@@ -3,8 +3,8 @@
  * Contains functions for fetching, creating, updating, and deleting posts.
  */
 
-import { addDoc, collection } from 'firebase/firestore';
-import { database } from '@/Firebase/firebaseSetup';
+import { addDoc, collection } from "firebase/firestore";
+import { database } from "@/Firebase/firebaseSetup";
 import {
   COLLECTIONS,
   queryDocuments,
@@ -14,7 +14,11 @@ import {
   getDocument,
   updateDocument,
   deleteDocument,
-} from '@/Firebase/firestoreHelper';
+} from "@/Firebase/firestoreHelper";
+import {
+  calculateDistance,
+  getCurrentLocation,
+} from "@/components/CalculateDistance";
 
 // Updated interface to match the full structure of a post
 export interface PublicPost {
@@ -56,41 +60,56 @@ export const fetchPublicPosts = async (
   limitCount = 10
 ): Promise<PublicPost[]> => {
   try {
-    console.log('Fetching public posts...');
+    const myLocation = await getCurrentLocation();
+    const { latitude, longitude } = myLocation?.coords || {
+      latitude: 38.8977,
+      longitude: -77.0365,
+    };
+    console.log(latitude, longitude);
+
+    console.log("Fetching public posts...");
 
     // Define query parameters
     const whereConditions: QueryParams[] = [
-      { fieldPath: 'isPublic', operator: '==', value: true },
+      { fieldPath: "isPublic", operator: "==", value: true },
     ];
 
     // Query the posts
     const results = await queryDocuments(
       COLLECTIONS.POSTS,
       whereConditions,
-      'createdAt',
-      'desc',
+      "createdAt",
+      "desc",
       limitCount
     );
 
+    console.log(results[0].location.longitude);
     console.log(`Fetched ${results.length} posts`);
 
+    const results_refined = results.filter((post) => {
+      const postLat = post.location.latitude;
+      const postLon = post.location.longitude;
+      const distance = calculateDistance(latitude, longitude, postLat, postLon);
+      return distance <= 5;
+    });
+
     // Map the results to the PublicPost interface
-    const posts: PublicPost[] = results.map((doc) => {
+    const posts: PublicPost[] = results_refined.map((doc) => {
       const processedData = processDocumentData(doc);
 
       return {
         id: doc.id,
-        title: processedData.title || 'Untitled Post',
-        content: processedData.content || '',
-        category: processedData.category || 'General',
+        title: processedData.title || "Untitled Post",
+        content: processedData.content || "",
+        category: processedData.category || "General",
         createdAt: processedData.createdAt,
-        locationName: processedData.locationName || 'Unknown location',
+        locationName: processedData.locationName || "Unknown location",
         location: processedData.location || {
           latitude: 0,
           longitude: 0,
         },
-        authorId: processedData.authorId || '',
-        authorName: processedData.authorName || 'Anonymous',
+        authorId: processedData.authorId || "",
+        authorName: processedData.authorName || "Anonymous",
         photoURL: processedData.photoURL,
         isPublic: processedData.isPublic || true,
         likes: processedData.likes || 0,
@@ -100,7 +119,7 @@ export const fetchPublicPosts = async (
 
     return posts;
   } catch (error) {
-    console.error('Error fetching public posts:', error);
+    console.error("Error fetching public posts:", error);
     return [];
   }
 };
@@ -110,7 +129,7 @@ export const createPost = async (
   postData: CreatePostData
 ): Promise<string | null> => {
   try {
-    console.log('Creating new post:', postData);
+    console.log("Creating new post:", postData);
 
     // Add post creation date
     const postWithDate = {
@@ -125,7 +144,7 @@ export const createPost = async (
 
     return postId;
   } catch (error) {
-    console.error('Error creating post:', error);
+    console.error("Error creating post:", error);
     return null;
   }
 };
@@ -136,72 +155,72 @@ export const createSamplePosts = async (): Promise<boolean> => {
     // Sample post data
     const samplePosts = [
       {
-        title: 'Traffic Alert: Accident on Main Street',
+        title: "Traffic Alert: Accident on Main Street",
         content:
-          'Accident at the intersection of Main St and Broadway. Traffic backed up. Seek alternate routes.',
-        category: 'Traffic',
-        locationName: 'Main St & Broadway',
+          "Accident at the intersection of Main St and Broadway. Traffic backed up. Seek alternate routes.",
+        category: "Traffic",
+        locationName: "Main St & Broadway",
         location: {
           latitude: 47.6205,
           longitude: -122.3493,
         },
-        authorId: 'sample-author-1',
-        authorName: 'Traffic Monitor',
-        photoURL: 'https://picsum.photos/seed/traffic/400/300',
+        authorId: "sample-author-1",
+        authorName: "Traffic Monitor",
+        photoURL: "https://picsum.photos/seed/traffic/400/300",
         isPublic: true,
         likes: 5,
         verified: 3,
         createdAt: new Date(),
       },
       {
-        title: 'Community Event: Farmers Market Today',
+        title: "Community Event: Farmers Market Today",
         content:
-          'The weekly farmers market is open today from 9am-2pm. Fresh produce and local crafts available!',
-        category: 'Event',
-        locationName: 'City Center Plaza',
+          "The weekly farmers market is open today from 9am-2pm. Fresh produce and local crafts available!",
+        category: "Event",
+        locationName: "City Center Plaza",
         location: {
           latitude: 47.6219,
           longitude: -122.3517,
         },
-        authorId: 'sample-author-2',
-        authorName: 'Event Coordinator',
-        photoURL: 'https://picsum.photos/seed/farmers/400/300',
+        authorId: "sample-author-2",
+        authorName: "Event Coordinator",
+        photoURL: "https://picsum.photos/seed/farmers/400/300",
         isPublic: true,
         likes: 12,
         verified: 8,
         createdAt: new Date(Date.now() - 1000 * 60 * 60),
       },
       {
-        title: 'Construction Update: Road Closure',
+        title: "Construction Update: Road Closure",
         content:
-          'Pine Street will be closed between 5th and 6th Ave for the next 2 days due to utility work.',
-        category: 'Infrastructure',
-        locationName: 'Pine St between 5th-6th Ave',
+          "Pine Street will be closed between 5th and 6th Ave for the next 2 days due to utility work.",
+        category: "Infrastructure",
+        locationName: "Pine St between 5th-6th Ave",
         location: {
           latitude: 47.615,
           longitude: -122.335,
         },
-        authorId: 'sample-author-3',
-        authorName: 'City Works',
-        photoURL: 'https://picsum.photos/seed/construction/400/300',
+        authorId: "sample-author-3",
+        authorName: "City Works",
+        photoURL: "https://picsum.photos/seed/construction/400/300",
         isPublic: true,
         likes: 3,
         verified: 4,
         createdAt: new Date(Date.now() - 1000 * 60 * 60 * 3),
       },
       {
-        title: 'Safety Alert: Suspicious Activity',
+        title: "Safety Alert: Suspicious Activity",
         content:
-          'Residents reported suspicious person checking car doors in the Oak Hill neighborhood around midnight.',
-        category: 'Safety',
-        locationName: 'Oak Hill Neighborhood',
+          "Residents reported suspicious person checking car doors in the Oak Hill neighborhood around midnight.",
+        category: "Safety",
+        locationName: "Oak Hill Neighborhood",
         location: {
           latitude: 47.625,
           longitude: -122.342,
         },
-        authorId: 'sample-author-4',
-        authorName: 'Neighborhood Watch',
-        photoURL: 'https://picsum.photos/seed/safety/400/300',
+        authorId: "sample-author-4",
+        authorName: "Neighborhood Watch",
+        photoURL: "https://picsum.photos/seed/safety/400/300",
         isPublic: true,
         likes: 18,
         verified: 6,
@@ -216,10 +235,10 @@ export const createSamplePosts = async (): Promise<boolean> => {
       await addDocument(COLLECTIONS.POSTS, post);
     }
 
-    console.log('Sample posts created successfully');
+    console.log("Sample posts created successfully");
     return true;
   } catch (error) {
-    console.error('Error creating sample posts:', error);
+    console.error("Error creating sample posts:", error);
     return false;
   }
 };
@@ -236,24 +255,24 @@ export const getPostById = async (
 
     return {
       id: doc.id,
-      title: processedData.title || 'Untitled Post',
-      content: processedData.content || '',
-      category: processedData.category || 'General',
+      title: processedData.title || "Untitled Post",
+      content: processedData.content || "",
+      category: processedData.category || "General",
       createdAt: processedData.createdAt,
-      locationName: processedData.locationName || 'Unknown location',
+      locationName: processedData.locationName || "Unknown location",
       location: processedData.location || {
         latitude: 0,
         longitude: 0,
       },
-      authorId: processedData.authorId || '',
-      authorName: processedData.authorName || 'Anonymous',
+      authorId: processedData.authorId || "",
+      authorName: processedData.authorName || "Anonymous",
       photoURL: processedData.photoURL,
       isPublic: processedData.isPublic || true,
       likes: processedData.likes || 0,
       verified: processedData.verified || 0,
     };
   } catch (error) {
-    console.error('Error getting post by ID:', error);
+    console.error("Error getting post by ID:", error);
     return null;
   }
 };
@@ -269,7 +288,7 @@ export const updatePost = async (
     // Use the helper to update the document
     return await updateDocument(COLLECTIONS.POSTS, postId, updates);
   } catch (error) {
-    console.error('Error updating post:', error);
+    console.error("Error updating post:", error);
     return false;
   }
 };
@@ -282,7 +301,7 @@ export const deletePost = async (postId: string): Promise<boolean> => {
     // Use the helper to delete the document
     return await deleteDocument(COLLECTIONS.POSTS, postId);
   } catch (error) {
-    console.error('Error deleting post:', error);
+    console.error("Error deleting post:", error);
     return false;
   }
 };
@@ -296,7 +315,7 @@ export const likePost = async (postId: string): Promise<boolean> => {
     const newLikes = (post.likes || 0) + 1;
     return await updateDocument(COLLECTIONS.POSTS, postId, { likes: newLikes });
   } catch (error) {
-    console.error('Error liking post:', error);
+    console.error("Error liking post:", error);
     return false;
   }
 };
@@ -312,7 +331,7 @@ export const verifyPost = async (postId: string): Promise<boolean> => {
       verified: newVerified,
     });
   } catch (error) {
-    console.error('Error verifying post:', error);
+    console.error("Error verifying post:", error);
     return false;
   }
 };
@@ -326,14 +345,14 @@ export const fetchPostsByAuthor = async (
     console.log(`Fetching posts by author ${authorId}...`);
 
     const whereConditions: QueryParams[] = [
-      { fieldPath: 'authorId', operator: '==', value: authorId },
+      { fieldPath: "authorId", operator: "==", value: authorId },
     ];
 
     const results = await queryDocuments(
       COLLECTIONS.POSTS,
       whereConditions,
-      'createdAt',
-      'desc',
+      "createdAt",
+      "desc",
       limitCount
     );
 
@@ -344,17 +363,17 @@ export const fetchPostsByAuthor = async (
 
       return {
         id: doc.id,
-        title: processedData.title || 'Untitled Post',
-        content: processedData.content || '',
-        category: processedData.category || 'General',
+        title: processedData.title || "Untitled Post",
+        content: processedData.content || "",
+        category: processedData.category || "General",
         createdAt: processedData.createdAt,
-        locationName: processedData.locationName || 'Unknown location',
+        locationName: processedData.locationName || "Unknown location",
         location: processedData.location || {
           latitude: 0,
           longitude: 0,
         },
-        authorId: processedData.authorId || '',
-        authorName: processedData.authorName || 'Anonymous',
+        authorId: processedData.authorId || "",
+        authorName: processedData.authorName || "Anonymous",
         photoURL: processedData.photoURL,
         isPublic: processedData.isPublic || true,
         likes: processedData.likes || 0,
