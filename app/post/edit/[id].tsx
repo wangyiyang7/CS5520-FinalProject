@@ -29,6 +29,9 @@ import { ThemedView } from "@/components/ThemedView";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { classifyText } from "@/components/Classification";
 
+import { useClassification } from '@/hooks/useClassification';
+
+
 export default function EditPostScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
@@ -43,6 +46,9 @@ export default function EditPostScreen() {
   const [cameraPermission, requestCameraPermission] =
     ImagePicker.useCameraPermissions();
   const [post, setPost] = useState<any>(null);
+
+  const { category: detectedCategory, isClassifying, error, handleTextChange } = useClassification(true);
+
 
   // Load post data
   useEffect(() => {
@@ -77,6 +83,13 @@ export default function EditPostScreen() {
         if (postData.photoURL) {
           setOriginalPhotoURL(postData.photoURL);
         }
+
+        if (postData.category) {
+          setCategory(postData.category);
+        }
+
+
+
       } catch (err) {
         console.error("Error loading post for editing:", err);
         Alert.alert("Error", "Failed to load post data");
@@ -95,6 +108,10 @@ export default function EditPostScreen() {
       //     [{ text: "OK", onPress: () => router.push("/(auth)/login") }]
       // );
     }
+
+
+
+
   }, [id, currentUser]);
 
   // Handle taking a photo
@@ -248,7 +265,9 @@ export default function EditPostScreen() {
                         </View>
                     </View>
 */}
-          <View style={styles.formGroup}>
+
+
+          {/* <View style={styles.formGroup}>
             <ThemedText style={styles.label}>Content</ThemedText>
             <TextInput
               style={[styles.input, styles.textArea]}
@@ -259,15 +278,60 @@ export default function EditPostScreen() {
               numberOfLines={5}
               textAlignVertical="top"
             />
+          </View> */}
+
+
+
+          <View style={styles.formGroup}>
+            <ThemedText style={styles.label}>Content</ThemedText>
+            <TextInput
+              style={[styles.input, styles.textArea]}
+              value={content}
+              onChangeText={(text) => {
+                setContent(text);
+                handleTextChange(text);
+
+                // Update category when a new one is detected
+                if (detectedCategory && text.length >= 20) {
+                  setCategory(detectedCategory);
+                }
+              }}
+              placeholder="Describe what's happening..."
+              multiline
+              numberOfLines={5}
+              textAlignVertical="top"
+            />
           </View>
-          <View>
+
+
+
+
+          {isClassifying ? (
+            <View style={styles.classificationStatus}>
+              <ActivityIndicator size="small" color={Colors.light.tint} />
+              <ThemedText style={styles.classifyingText}>Analyzing content...</ThemedText>
+            </View>
+          ) : (
+            category ? (
+              <ThemedText style={[styles.formGroup, styles.categoryText]}>
+                Category: {category}
+              </ThemedText>
+            ) : content.length > 0 && content.length < 20 ? (
+              <ThemedText style={[styles.formGroup, styles.hintText]}>
+                Add {20 - content.length} more characters for automatic classification
+              </ThemedText>
+            ) : null
+          )}
+
+
+          {/* <View>
             <Button title="AI POWER!" onPress={handleClassify} />
             {category ? (
               <ThemedText style={[styles.formGroup, styles.label]}>
                 Category: {category}
               </ThemedText>
             ) : null}
-          </View>
+          </View> */}
 
           <View style={styles.formGroup}>
             <ThemedText style={styles.label}>Photo</ThemedText>
@@ -405,4 +469,37 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
+
+  classificationStatus: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  classifyingText: {
+    marginLeft: 8,
+    fontSize: 14,
+    color: '#666',
+  },
+  categoryText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#333',
+    marginTop: 0,
+    marginBottom: 16,
+    padding: 8,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 6,
+  },
+  hintText: {
+    fontSize: 14,
+    color: '#666',
+    fontStyle: 'italic',
+  },
+
+
+
+
+
+
+
 });

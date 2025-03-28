@@ -4,7 +4,7 @@ export const classifyText = async (text: string): Promise<string> => {
 
   // console.log(API_URL);
   if (text.length < 20) {
-    return "Alert! Text too short"; // API requires at least 20 characters
+    return "Alert! Content too short"; // API requires at least 20 characters
 
   }
 
@@ -51,6 +51,7 @@ export const classifyText = async (text: string): Promise<string> => {
         categoryName.includes("hobbies") ||
         categoryName.includes("leisure") ||
         categoryName.includes("games") ||
+        categoryName.includes("fun") ||
         categoryName.includes("shopping") ||
         categoryName.includes("fashion") ||
         categoryName.includes("internet") ||
