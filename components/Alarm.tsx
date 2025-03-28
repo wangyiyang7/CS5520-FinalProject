@@ -84,11 +84,14 @@ export default function Alarm() {
         updatedDate.setHours(time.getHours());
         updatedDate.setMinutes(time.getMinutes());
         updatedDate.setSeconds(0);
+        updatedDate.setMilliseconds(0);
       } else {
         updatedDate.setHours(time.getHours());
         updatedDate.setMinutes(time.getMinutes());
         updatedDate.setSeconds(0);
+        updatedDate.setMilliseconds(0);
       }
+      console.log("updatedDate:", updatedDate);
       setSelectedDate(updatedDate);
     }
   };
