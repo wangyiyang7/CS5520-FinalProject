@@ -29,19 +29,9 @@ export default function Alarm() {
           importance: Notifications.AndroidImportance.MAX,
         });
       } catch (e) {}
-
-      // Configure notification handler
-      Notifications.setNotificationHandler({
-        handleNotification: async () => ({
-          shouldShowAlert: true,
-          shouldPlaySound: true,
-          shouldSetBadge: false,
-        }),
-      });
     };
 
     setupNotifications();
-
     // Optional: Cleanup function
     return () => {
       // Cancel all notifications when component unmounts
