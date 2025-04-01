@@ -1,4 +1,3 @@
-// File: app/(tabs)/map.tsx
 /**
  * Interactive map view that displays all posts as markers based on their locations.
  * Allows users to explore posts geographically with a preview panel for selected posts.

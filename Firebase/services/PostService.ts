@@ -20,6 +20,8 @@ import {
   getCurrentLocation,
 } from '@/utils/calculateDistance';
 
+import { notifyUsersAboutPost } from './NotificationService';
+
 // Updated interface to match the full structure of a post
 export interface PublicPost {
   id: string;
@@ -56,8 +58,10 @@ export interface CreatePostData {
   isPublic: boolean;
 }
 
+// Updated function to filter by radius condition
 export const fetchPublicPosts = async (
-  limitCount = 10
+  limitCount = 10,
+  radiusKm = 5 // Add the radius parameter with default 5km
 ): Promise<PublicPost[]> => {
   try {
     const myLocation = await getCurrentLocation();
@@ -74,6 +78,8 @@ export const fetchPublicPosts = async (
       { fieldPath: 'isPublic', operator: '==', value: true },
     ];
 
+    console.log('Querying documents from posts in fetchPublicPosts');
+
     // Query the posts
     const results = await queryDocuments(
       COLLECTIONS.POSTS,
@@ -83,14 +89,30 @@ export const fetchPublicPosts = async (
       limitCount
     );
 
-    console.log(results[0].location.longitude);
+    // Safety check for empty results
+    if (results.length === 0) {
+      console.log('No posts found in database');
+      return [];
+    }
+
     console.log(`Fetched ${results.length} posts`);
 
+    // Filter using the provided radius parameter instead of hardcoded 5km
     const results_refined = results.filter((post) => {
+      // Skip posts with invalid location data
+      if (
+        !post.location ||
+        typeof post.location.latitude !== 'number' ||
+        typeof post.location.longitude !== 'number'
+      ) {
+        console.log('Skipping post with invalid location data:', post.id);
+        return false;
+      }
+
       const postLat = post.location.latitude;
       const postLon = post.location.longitude;
       const distance = calculateDistance(latitude, longitude, postLat, postLon);
-      return distance <= 5;
+      return distance <= radiusKm; // Use the parameter instead of hardcoded value
     });
 
     // Map the results to the PublicPost interface
@@ -141,6 +163,22 @@ export const createPost = async (
 
     // Use the helper to add the document
     const postId = await addDocument(COLLECTIONS.POSTS, postWithDate);
+
+    // const postId = await addDocument(COLLECTIONS.POSTS, postWithDate);
+
+    // New code to notify users
+    if (postId) {
+      // Get the complete post data with ID
+      const newPost = await getPostById(postId);
+      if (newPost) {
+        // Notify users in background, don't wait for completion
+        notifyUsersAboutPost(newPost)
+          .then((count) =>
+            console.log(`Notified ${count} users about new post`)
+          )
+          .catch((err) => console.error('Error sending notifications:', err));
+      }
+    }
 
     return postId;
   } catch (error) {
@@ -347,6 +385,8 @@ export const fetchPostsByAuthor = async (
     const whereConditions: QueryParams[] = [
       { fieldPath: 'authorId', operator: '==', value: authorId },
     ];
+
+    console.log('Querying documents from posts in fetchPostsByAuthor');
 
     const results = await queryDocuments(
       COLLECTIONS.POSTS,

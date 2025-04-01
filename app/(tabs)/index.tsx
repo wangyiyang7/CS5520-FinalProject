@@ -21,7 +21,7 @@ setNotificationHandler({
 export default function HomeScreen() {
   return (
     <View style={styles.container}>
-      <PublicContentHeader />
+      {/* <PublicContentHeader /> */}
       <PublicPostsList />
     </View>
   );

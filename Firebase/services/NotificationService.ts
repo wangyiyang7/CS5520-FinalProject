@@ -11,7 +11,10 @@ import {
   deleteDocument,
   processDocumentData,
   QueryParams,
+  getDocument,
 } from '@/Firebase/firestoreHelper';
+import { calculateDistance } from '@/utils/calculateDistance';
+import { PublicPost } from './PostService';
 
 // Notification interface
 export interface Notification {
@@ -227,5 +230,246 @@ export const getScheduledNotifications = async (
   } catch (error) {
     console.error('Error getting scheduled notifications:', error);
     return [];
+  }
+};
+
+// Function to notify users about a new post based on their preferences
+export const notifyUsersAboutPost = async (
+  post: PublicPost
+): Promise<number> => {
+  try {
+    // Get all users with notification preferences
+    const usersWithPreferences = await queryDocuments(COLLECTIONS.USERS, [
+      {
+        fieldPath: 'notificationPreferences.categories',
+        operator: 'array-contains',
+        value: post.category,
+      },
+    ]);
+
+    let notificationCount = 0;
+
+    // For each user, check if post is within their preferred radius
+    for (const user of usersWithPreferences) {
+      const preferences = user.notificationPreferences;
+
+      // Skip users with no radius preference
+      if (!preferences || !preferences.radius) continue;
+
+      // Get the user's last known location (you might need to adapt this based on how you store location)
+      // If you don't store user locations, you could use their last post location or default location
+      const userLocation = await getUserLastLocation(user.id);
+      if (!userLocation) continue;
+
+      // Calculate distance between post and user
+      const distance = calculateDistance(
+        userLocation.latitude,
+        userLocation.longitude,
+        post.location.latitude,
+        post.location.longitude
+      );
+
+      // If post is within radius, create a notification
+
+      if (distance <= preferences.radius) {
+        // Create in-app notification
+        await createNotification({
+          userId: user.id,
+          type: 'post',
+          title: `New ${post.category} post nearby`,
+          content: `${post.title} - ${post.locationName}`,
+          relatedPostId: post.id,
+          location: post.location,
+          category: post.category,
+        });
+
+        console.log(`Notified user ${user.id}  about post ${post.id}`);
+
+        // Add push notification if user has a push token
+        if (user.pushToken) {
+          await sendPushNotification(
+            user.pushToken,
+            `New ${post.category} post nearby`,
+            `${post.title} - ${post.locationName}`,
+            { postId: post.id }
+          );
+        }
+
+        notificationCount++;
+      }
+
+      // if (distance <= preferences.radius) {
+      //   await createNotification({
+      //     userId: user.id,
+      //     type: 'post',
+      //     title: `New ${post.category} post nearby`,
+      //     content: `${post.title} - ${post.locationName}`,
+      //     relatedPostId: post.id,
+      //     location: post.location,
+      //     category: post.category
+      //   });
+      //   notificationCount++;
+      // }
+    }
+
+    return notificationCount;
+  } catch (error) {
+    console.error('Error notifying users about post:', error);
+    return 0;
+  }
+};
+
+// Helper function to get a user's last known location
+// We'll need to implement this based on how you track user location
+const getUserLastLocation = async (
+  userId: string
+): Promise<{ latitude: number; longitude: number } | null> => {
+  try {
+    // Option 1: If you store location in user profile
+    const userProfile = await getDocument(COLLECTIONS.USERS, userId);
+    if (userProfile && userProfile.lastKnownLocation) {
+      return userProfile.lastKnownLocation;
+    }
+
+    // Option 2: Use their most recent post location
+    const userPosts = await queryDocuments(
+      COLLECTIONS.POSTS,
+      [{ fieldPath: 'authorId', operator: '==', value: userId }],
+      'createdAt',
+      'desc',
+      1
+    );
+
+    if (userPosts.length > 0 && userPosts[0].location) {
+      return userPosts[0].location;
+    }
+
+    return null;
+  } catch (error) {
+    console.error('Error getting user location:', error);
+    return null;
+  }
+};
+
+// Send a push notification to a user
+export const sendPushNotification__ = async (
+  pushToken: string,
+  title: string,
+  body: string,
+  data?: Record<string, any>
+): Promise<boolean> => {
+  try {
+    const message = {
+      to: pushToken,
+      sound: 'default',
+      title: title,
+      body: body,
+      data: data || {},
+    };
+
+    const response = await fetch('https://exp.host/--/api/v2/push/send', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Accept-encoding': 'gzip, deflate',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(message),
+    });
+
+    const responseData = await response.json();
+    console.log('Push Notification Response:', responseData);
+    return responseData.data && responseData.data.status === 'ok';
+  } catch (error) {
+    console.error('Error sending push notification:', error);
+    return false;
+  }
+};
+
+export const sendPushNotification = async (
+  pushToken: string,
+  title: string,
+  body: string,
+  data?: Record<string, any>
+): Promise<boolean> => {
+  try {
+    const message = {
+      to: pushToken,
+      sound: 'default',
+      title: title,
+      body: body,
+      data: data || {},
+    };
+
+    const response = await fetch('https://exp.host/--/api/v2/push/send', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Accept-encoding': 'gzip, deflate',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(message),
+    });
+
+    const responseData = await response.json();
+    console.log('Push Notification Response:', responseData);
+
+    if (!responseData.data || !responseData.data.id) {
+      console.error('Failed to get a push ticket ID.');
+      return false;
+    }
+
+    // Step 2: Fetch Receipt After a Short Delay (Expo Needs Time to Process)
+    const receiptId = responseData.data.id;
+    await new Promise((resolve) => setTimeout(resolve, 3000)); // Wait 3 seconds
+
+    const receiptResponse = await fetch(
+      'https://exp.host/--/api/v2/push/getReceipts',
+      {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ ids: [receiptId] }),
+      }
+    );
+
+    // const receiptData = await receiptResponse.json();
+    // console.log('Push Receipt Response:', receiptData);
+
+    // if (receiptData.data && receiptData.data[receiptId]) {
+    //   const status = receiptData.data[receiptId].status;
+    //   if (status === 'ok') {
+    //     console.log('Notification delivered successfully!');
+    //     return true;
+    //   } else {
+    //     console.error('Push notification error:', receiptData.data[receiptId]);
+    //   }
+    // }
+
+    const receiptData = await receiptResponse.json();
+    console.log('Push Receipt Response:', JSON.stringify(receiptData, null, 2)); // More detailed logging
+
+    if (receiptData.data && receiptData.data[receiptId]) {
+      const status = receiptData.data[receiptId].status;
+      console.log('Push notification receipt status:', status);
+      if (status === 'ok') {
+        console.log('Notification delivered successfully!');
+        return true;
+      } else {
+        console.error(
+          'Push notification error details:',
+          receiptData.data[receiptId]
+        );
+      }
+    } else {
+      console.error('No receipt data found for ticket ID:', receiptId);
+    }
+
+    return false;
+  } catch (error) {
+    console.error('Error sending push notification:', error);
+    return false;
   }
 };
