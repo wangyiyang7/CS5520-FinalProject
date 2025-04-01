@@ -10,8 +10,8 @@ import {
   updateDocument,
   setDocument,
   processDocumentData,
-} from "@/Firebase/firestoreHelper";
-import { Timestamp } from "firebase/firestore";
+} from '@/Firebase/firestoreHelper';
+import { Timestamp } from 'firebase/firestore';
 // User profile interface
 export interface UserProfile {
   id: string;
@@ -36,21 +36,20 @@ export const createUserProfile = async (
     const now = Timestamp.now();
 
     const userData = {
-      username: username || email.split("@")[0], // Default username from email if not provided
+      username: username || email.split('@')[0], // Default username from email if not provided
       email,
       createdAt: now,
       lastLogin: [now, now],
       notificationPreferences: {
         categories: [],
         radius: 0,
-        
       },
     };
 
     // Use setDocument to create with a specific ID (the auth user ID)
     return await setDocument(COLLECTIONS.USERS, userId, userData, false);
   } catch (error) {
-    console.error("Error creating user profile:", error);
+    console.error('Error creating user profile:', error);
     return false;
   }
 };
@@ -67,19 +66,18 @@ export const getUserProfile = async (
     console.log(processedData.lastLogin);
     return {
       id: doc.id,
-      username: processedData.username || "",
-      email: processedData.email || "",
+      username: processedData.username || '',
+      email: processedData.email || '',
       photoURL: processedData.photoURL,
       createdAt: doc.createdAt,
       lastLogin: doc.lastLogin,
       notificationPreferences: processedData.notificationPreferences || {
         categories: [],
         radius: 0,
-        
       },
     };
   } catch (error) {
-    console.error("Error getting user profile:", error);
+    console.error('Error getting user profile:', error);
     return null;
   }
 };
@@ -95,7 +93,7 @@ export const updateUserProfile = async (
 
     return await updateDocument(COLLECTIONS.USERS, userId, validUpdates);
   } catch (error) {
-    console.error("Error updating user profile:", error);
+    console.error('Error updating user profile:', error);
     return false;
   }
 };
@@ -103,7 +101,7 @@ export const updateUserProfile = async (
 // Update user's notification preferences
 export const updateNotificationPreferences = async (
   userId: string,
-  preferences: Partial<UserProfile["notificationPreferences"]>
+  preferences: Partial<UserProfile['notificationPreferences']>
 ): Promise<boolean> => {
   try {
     // Get the current user profile
@@ -121,7 +119,7 @@ export const updateNotificationPreferences = async (
       notificationPreferences: updatedPreferences,
     });
   } catch (error) {
-    console.error("Error updating notification preferences:", error);
+    console.error('Error updating notification preferences:', error);
     return false;
   }
 };
@@ -133,7 +131,7 @@ export const updateLastLogin = async (userId: string): Promise<boolean> => {
       lastLogin: new Date(),
     });
   } catch (error) {
-    console.error("Error updating last login:", error);
+    console.error('Error updating last login:', error);
     return false;
   }
 };
@@ -144,7 +142,7 @@ export const checkUserExists = async (userId: string): Promise<boolean> => {
     const user = await getDocument(COLLECTIONS.USERS, userId);
     return !!user;
   } catch (error) {
-    console.error("Error checking if user exists:", error);
+    console.error('Error checking if user exists:', error);
     return false;
   }
 };
@@ -166,7 +164,22 @@ export const createOrUpdateUser = async (
       return await createUserProfile(userId, email, username);
     }
   } catch (error) {
-    console.error("Error creating or updating user:", error);
+    console.error('Error creating or updating user:', error);
+    return false;
+  }
+};
+
+// Store a user's push notification token
+export const updateUserPushToken = async (
+  userId: string,
+  pushToken: string
+): Promise<boolean> => {
+  try {
+    return await updateDocument(COLLECTIONS.USERS, userId, {
+      pushToken: pushToken,
+    });
+  } catch (error) {
+    console.error('Error updating push token:', error);
     return false;
   }
 };
