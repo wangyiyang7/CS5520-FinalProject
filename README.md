@@ -214,22 +214,37 @@ I've implemented complete CRUD operations for posts:
 
 `Setting up firebase rules for the project`
 
-   // Allow public read access to posts
+  // Posts collection - public read, authenticated write
     match /posts/{postId} {
-      allow read: if true; // Anyone can read posts
-      allow write, update, delete: if request.auth != null && request.auth.uid == resource.data.authorId; // Only author can modify
+      // Anyone can read public posts
+      allow read: if resource.data.isPublic == true || 
+                   (request.auth != null && request.auth.uid == resource.data.authorId);
+      
+      // Only authenticated users can create posts
+      allow create: if request.auth != null && 
+                      request.auth.uid == request.resource.data.authorId && 
+                      request.resource.data.createdAt is timestamp;
+      
+      // Only the author can update or delete their own posts
+      allow update, delete: if request.auth != null && 
+                             request.auth.uid == resource.data.authorId;
     }
     
-    // User profiles - protect but allow users to manage their own data
+    // Users collection - manage own profile
     match /users/{userId} {
-      allow read: if true; // Public profiles
-      allow write, update: if request.auth != null && request.auth.uid == userId;
+      // Anyone can read user profiles
+      allow read: if true;
+      
+      // Users can only write to their own profile
+      allow write: if request.auth != null && request.auth.uid == userId;
     }
     
-    // Notifications - only accessible by the user they belong to
+    // Notifications collection - private to each user
     match /notifications/{notificationId} {
-      allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
+      allow read, write: if request.auth != null && 
+                          request.auth.uid == resource.data.userId;
     }
+  
 
 1. Enhanced fetchPublicPosts to filter by dynamic radius and add safety checks for location data
 2. Created a search Component Called PostFilters to enable users to search by various parameters ie. Text,Categories,Distance & Time
