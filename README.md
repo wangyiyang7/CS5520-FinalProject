@@ -210,6 +210,32 @@ I've implemented complete CRUD operations for posts:
    reusable in other components.
 
 
+### Work Updates for branch (interactive-map-view) Carlos---------------------------
+
+`Setting up firebase rules for the project`
+
+   // Allow public read access to posts
+    match /posts/{postId} {
+      allow read: if true; // Anyone can read posts
+      allow write, update, delete: if request.auth != null && request.auth.uid == resource.data.authorId; // Only author can modify
+    }
+    
+    // User profiles - protect but allow users to manage their own data
+    match /users/{userId} {
+      allow read: if true; // Public profiles
+      allow write, update: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Notifications - only accessible by the user they belong to
+    match /notifications/{notificationId} {
+      allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
+    }
+
+1. fixed some few undefined value issues on userInfo UI handling
+2. 
+
+
+
 
 ## Yiyang Wang's Contributions by feature branch:
 
