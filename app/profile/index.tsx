@@ -120,20 +120,40 @@ export default function ProfileScreen() {
               uri: userInfo.photoURL
                 ? userInfo.photoURL
                 : Image.resolveAssetSource(
-                    require("@/assets/images/profile.jpg")
-                  ).uri,
+                  require("@/assets/images/profile.jpg")
+                ).uri,
             }}
             style={styles.profileImage}
           />
           <View style={styles.textContainer}>
-            <Text style={styles.username}>{userInfo.username}</Text>
+            {/* <Text style={styles.username}>{userInfo.username}</Text>
             <Text style={styles.email}>Email: {userInfo.email}</Text>
             <Text style={styles.createdAt}>
-              Member since: {userInfo.createdAt.toDate().toLocaleString()}
+              Member since: {userInfo.createdAt?.toDate().toLocaleString()}
             </Text>
             <Text style={styles.lastLogin}>
-              Last Login: {userInfo.lastLogin[0].toDate().toLocaleString()}
+              Last Login: {userInfo.lastLogin[0]?.toDate().toLocaleString()}
+            </Text> */}
+
+
+
+            <Text style={styles.username}>{userInfo?.username || "Username not set"}</Text>
+            <Text style={styles.email}>Email: {userInfo?.email || "Email not available"}</Text>
+            <Text style={styles.createdAt}>
+              Member since: {userInfo?.createdAt && typeof userInfo.createdAt.toDate === 'function'
+                ? userInfo.createdAt.toDate().toLocaleString()
+                : "Date not available"}
             </Text>
+            <Text style={styles.lastLogin}>
+              Last Login: {userInfo?.lastLogin && Array.isArray(userInfo.lastLogin) && userInfo.lastLogin.length > 0
+                && typeof userInfo.lastLogin[0].toDate === 'function'
+                ? userInfo.lastLogin[0].toDate().toLocaleString()
+                : "Login date not available"}
+            </Text>
+
+
+
+
           </View>
         </View>
       )}
