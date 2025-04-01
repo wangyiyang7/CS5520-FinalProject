@@ -210,7 +210,7 @@ I've implemented complete CRUD operations for posts:
    reusable in other components.
 
 
-### Work Updates for branch (interactive-map-view) Carlos---------------------------
+### Work Updates for branch (search-post-by-text-category-distance-time) Carlos
 
 `Setting up firebase rules for the project`
 
@@ -231,8 +231,10 @@ I've implemented complete CRUD operations for posts:
       allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
     }
 
-1. fixed some few undefined value issues on userInfo UI handling
-2. 
+1. Enhanced fetchPublicPosts to filter by dynamic radius and add safety checks for location data
+2. Created a search Component Called PostFilters to enable users to search by various parameters ie. Text,Categories,Distance & Time
+3. Added Search functionality to PublicPostsList component with user location support
+4. Remove commented-out PublicContentHeader from HomeScreen component to pave way for the Search Post feature
 
 
 
