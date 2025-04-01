@@ -36,8 +36,15 @@ import { Ionicons } from "@expo/vector-icons";
 import { classifyText } from "@/components/Classification";
 
 import { useClassification } from '@/hooks/useClassification';
+import { usePushNotifications } from "@/hooks/usePushNotifications";
+
 
 export default function PostScreen() {
+
+  // Register for push notifications. This will register for push notifications
+  usePushNotifications();
+
+
   const router = useRouter();
   const { currentUser } = useContext(AuthContext);
   const [title, setTitle] = useState("");
