@@ -41,7 +41,7 @@ import { usePushNotifications } from "@/hooks/usePushNotifications";
 
 export default function PostScreen() {
 
-  // Register for push notifications. This will register for push notifications
+  // Register for push notifications.
   usePushNotifications();
 
 

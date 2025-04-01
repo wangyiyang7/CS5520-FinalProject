@@ -214,6 +214,7 @@ I've implemented complete CRUD operations for posts:
 
 `Setting up firebase rules for the project`
 
+``
   // Posts collection - public read, authenticated write
     match /posts/{postId} {
       // Anyone can read public posts
@@ -244,12 +245,30 @@ I've implemented complete CRUD operations for posts:
       allow read, write: if request.auth != null && 
                           request.auth.uid == resource.data.userId;
     }
+``
   
-
 1. Enhanced fetchPublicPosts to filter by dynamic radius and add safety checks for location data
 2. Created a search Component Called PostFilters to enable users to search by various parameters ie. Text,Categories,Distance & Time
 3. Added Search functionality to PublicPostsList component with user location support
 4. Remove commented-out PublicContentHeader from HomeScreen component to pave way for the Search Post feature
+
+
+### Work Updates for branch (post-notifcations-based-on-profile-settings) Carlos
+
+``
+EXPO_PUBLIC_ExpoProjectId="expo-project-id-different-from-firebase-project-id"
+``
+
+`Safety Considerations`
+
+`*` We're only adding new functions and not modifying existing functionality.
+`*` The push notification code checks for permissions and tokens before attempting to send, so it won't crash if push isn't available.
+`*` The in-app notification system remains intact and functions independently of push notifications.
+`*`  Push notification code only runs for logged-in users, preserving your existing behavior for anonymous users.
+
+1. Implemented user notification system for new posts based on preferences and location.
+2. Notify users about new posts upon creation in PostServices.
+3. Created a custom hook  for managing push notifications and user token registration.
 
 
 
