@@ -20,6 +20,8 @@ import {
   getCurrentLocation,
 } from '@/utils/calculateDistance';
 
+import { notifyUsersAboutPost } from './NotificationService';
+
 // Updated interface to match the full structure of a post
 export interface PublicPost {
   id: string;
@@ -75,6 +77,8 @@ export const fetchPublicPosts = async (
     const whereConditions: QueryParams[] = [
       { fieldPath: 'isPublic', operator: '==', value: true },
     ];
+
+    console.log('Querying documents from posts in fetchPublicPosts');
 
     // Query the posts
     const results = await queryDocuments(
@@ -159,6 +163,22 @@ export const createPost = async (
 
     // Use the helper to add the document
     const postId = await addDocument(COLLECTIONS.POSTS, postWithDate);
+
+    // const postId = await addDocument(COLLECTIONS.POSTS, postWithDate);
+
+    // New code to notify users
+    if (postId) {
+      // Get the complete post data with ID
+      const newPost = await getPostById(postId);
+      if (newPost) {
+        // Notify users in background, don't wait for completion
+        notifyUsersAboutPost(newPost)
+          .then((count) =>
+            console.log(`Notified ${count} users about new post`)
+          )
+          .catch((err) => console.error('Error sending notifications:', err));
+      }
+    }
 
     return postId;
   } catch (error) {
@@ -365,6 +385,8 @@ export const fetchPostsByAuthor = async (
     const whereConditions: QueryParams[] = [
       { fieldPath: 'authorId', operator: '==', value: authorId },
     ];
+
+    console.log('Querying documents from posts in fetchPostsByAuthor');
 
     const results = await queryDocuments(
       COLLECTIONS.POSTS,
