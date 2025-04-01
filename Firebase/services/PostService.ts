@@ -56,8 +56,10 @@ export interface CreatePostData {
   isPublic: boolean;
 }
 
+// Updated function to filter by radius condition
 export const fetchPublicPosts = async (
-  limitCount = 10
+  limitCount = 10,
+  radiusKm = 5 // Add the radius parameter with default 5km
 ): Promise<PublicPost[]> => {
   try {
     const myLocation = await getCurrentLocation();
@@ -83,14 +85,30 @@ export const fetchPublicPosts = async (
       limitCount
     );
 
-    console.log(results[0].location.longitude);
+    // Safety check for empty results
+    if (results.length === 0) {
+      console.log('No posts found in database');
+      return [];
+    }
+
     console.log(`Fetched ${results.length} posts`);
 
+    // Filter using the provided radius parameter instead of hardcoded 5km
     const results_refined = results.filter((post) => {
+      // Skip posts with invalid location data
+      if (
+        !post.location ||
+        typeof post.location.latitude !== 'number' ||
+        typeof post.location.longitude !== 'number'
+      ) {
+        console.log('Skipping post with invalid location data:', post.id);
+        return false;
+      }
+
       const postLat = post.location.latitude;
       const postLon = post.location.longitude;
       const distance = calculateDistance(latitude, longitude, postLat, postLon);
-      return distance <= 5;
+      return distance <= radiusKm; // Use the parameter instead of hardcoded value
     });
 
     // Map the results to the PublicPost interface
