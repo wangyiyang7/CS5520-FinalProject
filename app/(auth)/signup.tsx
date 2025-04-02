@@ -5,17 +5,54 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/Firebase/firebaseSetup";
 import { createUserProfile } from "@/Firebase/services/UserService";
 
+const isPasswordStrong = (password: string): boolean => {
+  return (
+    password.length >= 8 &&
+    /[A-Z]/.test(password) &&
+    /[a-z]/.test(password) &&
+    /[0-9]/.test(password) &&
+    /[^A-Za-z0-9]/.test(password)
+  );
+};
+
+const getPasswordStrengthMessage = (password: string): string => {
+  const checks = {
+    length: password.length >= 8,
+    upperCase: /[A-Z]/.test(password),
+    lowerCase: /[a-z]/.test(password),
+    number: /[0-9]/.test(password),
+    special: /[^A-Za-z0-9]/.test(password),
+  };
+
+  const missing = [];
+  if (!checks.length) missing.push("at least 8 characters");
+  if (!checks.upperCase) missing.push("an uppercase letter");
+  if (!checks.lowerCase) missing.push("a lowercase letter");
+  if (!checks.number) missing.push("a number");
+  if (!checks.special) missing.push("a special character");
+
+  return missing.length > 0
+    ? `Password must contain ${missing.join(", ")}`
+    : "";
+};
+
 const signup = () => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
   const router = useRouter();
 
   const handleSignUp = async () => {
-    // Handle sign up logic here
-    console.log("Username:", username);
-    console.log("Email:", email);
-    console.log("Password:", password);
+    // Reset error
+    setPasswordError("");
+
+    // Check password strength before creating account
+    if (!isPasswordStrong(password)) {
+      setPasswordError(getPasswordStrengthMessage(password));
+      return;
+    }
+
     try {
       const userCredential = await createUserWithEmailAndPassword(
         auth,
@@ -48,14 +85,22 @@ const signup = () => {
         placeholder="Email"
         value={email}
         onChangeText={setEmail}
+        autoCapitalize="none"
+        keyboardType="email-address"
       />
       <TextInput
         style={styles.input}
         placeholder="Password"
         secureTextEntry
         value={password}
-        onChangeText={setPassword}
+        onChangeText={(text) => {
+          setPassword(text);
+          setPasswordError(getPasswordStrengthMessage(text));
+        }}
       />
+      {passwordError ? (
+        <Text style={styles.errorText}>{passwordError}</Text>
+      ) : null}
       <Button title="Sign Up" onPress={handleSignUp} />
       <Button
         title="Back to Login"
@@ -64,7 +109,6 @@ const signup = () => {
     </View>
   );
 };
-
 export default signup;
 
 const styles = StyleSheet.create({
@@ -84,5 +128,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginBottom: 12,
     paddingLeft: 8,
+  },
+  errorText: {
+    color: "red",
+    marginBottom: 12,
+    textAlign: "center",
   },
 });
