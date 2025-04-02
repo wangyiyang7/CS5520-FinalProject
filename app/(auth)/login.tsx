@@ -8,15 +8,9 @@ import {
   Platform,
 } from "react-native";
 import { useState } from "react";
-import {
-  RelativePathString,
-  useLocalSearchParams,
-  useRouter,
-  useSegments,
-} from "expo-router";
+import { useRouter } from "expo-router";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/Firebase/firebaseSetup";
-import { useRoute } from "@react-navigation/native";
 import { FirebaseError } from "@firebase/util";
 import { getDocument, updateDocument } from "@/Firebase/firestoreHelper";
 import { Timestamp } from "firebase/firestore";
