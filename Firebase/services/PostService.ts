@@ -15,15 +15,29 @@ import {
   updateDocument,
   deleteDocument,
 } from '@/Firebase/firestoreHelper';
+import {
+  calculateDistance,
+  getCurrentLocation,
+} from '@/utils/calculateDistance';
 
+import { notifyUsersAboutPost } from './NotificationService';
+
+// Updated interface to match the full structure of a post
 export interface PublicPost {
   id: string;
   title: string;
   content: string;
   category: string;
   createdAt: Date;
-  location: string;
+  locationName: string;
+  location: {
+    latitude: number;
+    longitude: number;
+  };
+  authorId: string;
+  authorName: string;
   photoURL?: string;
+  isPublic: boolean;
   likes: number;
   verified: number;
 }
@@ -44,16 +58,27 @@ export interface CreatePostData {
   isPublic: boolean;
 }
 
+// Updated function to filter by radius condition
 export const fetchPublicPosts = async (
-  limitCount = 10
+  limitCount = 10,
+  radiusKm = 5 // Add the radius parameter with default 5km
 ): Promise<PublicPost[]> => {
   try {
+    const myLocation = await getCurrentLocation();
+    const { latitude, longitude } = myLocation?.coords || {
+      latitude: 38.8977,
+      longitude: -77.0365,
+    };
+    console.log(latitude, longitude);
+
     console.log('Fetching public posts...');
 
     // Define query parameters
     const whereConditions: QueryParams[] = [
       { fieldPath: 'isPublic', operator: '==', value: true },
     ];
+
+    console.log('Querying documents from posts in fetchPublicPosts');
 
     // Query the posts
     const results = await queryDocuments(
@@ -64,10 +89,34 @@ export const fetchPublicPosts = async (
       limitCount
     );
 
+    // Safety check for empty results
+    if (results.length === 0) {
+      console.log('No posts found in database');
+      return [];
+    }
+
     console.log(`Fetched ${results.length} posts`);
 
+    // Filter using the provided radius parameter instead of hardcoded 5km
+    const results_refined = results.filter((post) => {
+      // Skip posts with invalid location data
+      if (
+        !post.location ||
+        typeof post.location.latitude !== 'number' ||
+        typeof post.location.longitude !== 'number'
+      ) {
+        console.log('Skipping post with invalid location data:', post.id);
+        return false;
+      }
+
+      const postLat = post.location.latitude;
+      const postLon = post.location.longitude;
+      const distance = calculateDistance(latitude, longitude, postLat, postLon);
+      return distance <= radiusKm; // Use the parameter instead of hardcoded value
+    });
+
     // Map the results to the PublicPost interface
-    const posts: PublicPost[] = results.map((doc) => {
+    const posts: PublicPost[] = results_refined.map((doc) => {
       const processedData = processDocumentData(doc);
 
       return {
@@ -76,8 +125,15 @@ export const fetchPublicPosts = async (
         content: processedData.content || '',
         category: processedData.category || 'General',
         createdAt: processedData.createdAt,
-        location: processedData.locationName || 'Unknown location',
+        locationName: processedData.locationName || 'Unknown location',
+        location: processedData.location || {
+          latitude: 0,
+          longitude: 0,
+        },
+        authorId: processedData.authorId || '',
+        authorName: processedData.authorName || 'Anonymous',
         photoURL: processedData.photoURL,
+        isPublic: processedData.isPublic || true,
         likes: processedData.likes || 0,
         verified: processedData.verified || 0,
       };
@@ -107,6 +163,22 @@ export const createPost = async (
 
     // Use the helper to add the document
     const postId = await addDocument(COLLECTIONS.POSTS, postWithDate);
+
+    // const postId = await addDocument(COLLECTIONS.POSTS, postWithDate);
+
+    // New code to notify users
+    if (postId) {
+      // Get the complete post data with ID
+      const newPost = await getPostById(postId);
+      if (newPost) {
+        // Notify users in background, don't wait for completion
+        notifyUsersAboutPost(newPost)
+          .then((count) =>
+            console.log(`Notified ${count} users about new post`)
+          )
+          .catch((err) => console.error('Error sending notifications:', err));
+      }
+    }
 
     return postId;
   } catch (error) {
@@ -225,8 +297,15 @@ export const getPostById = async (
       content: processedData.content || '',
       category: processedData.category || 'General',
       createdAt: processedData.createdAt,
-      location: processedData.locationName || 'Unknown location',
+      locationName: processedData.locationName || 'Unknown location',
+      location: processedData.location || {
+        latitude: 0,
+        longitude: 0,
+      },
+      authorId: processedData.authorId || '',
+      authorName: processedData.authorName || 'Anonymous',
       photoURL: processedData.photoURL,
+      isPublic: processedData.isPublic || true,
       likes: processedData.likes || 0,
       verified: processedData.verified || 0,
     };
@@ -292,5 +371,59 @@ export const verifyPost = async (postId: string): Promise<boolean> => {
   } catch (error) {
     console.error('Error verifying post:', error);
     return false;
+  }
+};
+
+// Fetch posts by author ID
+export const fetchPostsByAuthor = async (
+  authorId: string,
+  limitCount = 20
+): Promise<PublicPost[]> => {
+  try {
+    console.log(`Fetching posts by author ${authorId}...`);
+
+    const whereConditions: QueryParams[] = [
+      { fieldPath: 'authorId', operator: '==', value: authorId },
+    ];
+
+    console.log('Querying documents from posts in fetchPostsByAuthor');
+
+    const results = await queryDocuments(
+      COLLECTIONS.POSTS,
+      whereConditions,
+      'createdAt',
+      'desc',
+      limitCount
+    );
+
+    console.log(`Fetched ${results.length} posts by author ${authorId}`);
+
+    const posts: PublicPost[] = results.map((doc) => {
+      const processedData = processDocumentData(doc);
+
+      return {
+        id: doc.id,
+        title: processedData.title || 'Untitled Post',
+        content: processedData.content || '',
+        category: processedData.category || 'General',
+        createdAt: processedData.createdAt,
+        locationName: processedData.locationName || 'Unknown location',
+        location: processedData.location || {
+          latitude: 0,
+          longitude: 0,
+        },
+        authorId: processedData.authorId || '',
+        authorName: processedData.authorName || 'Anonymous',
+        photoURL: processedData.photoURL,
+        isPublic: processedData.isPublic || true,
+        likes: processedData.likes || 0,
+        verified: processedData.verified || 0,
+      };
+    });
+
+    return posts;
+  } catch (error) {
+    console.error(`Error fetching posts by author ${authorId}:`, error);
+    return [];
   }
 };

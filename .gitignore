@@ -3,6 +3,8 @@
 # dependencies
 node_modules/
 
+playground/
+
 # Expo
 .expo/
 dist/
@@ -37,3 +39,7 @@ yarn-error.*
 *.tsbuildinfo
 
 app-example
+
+# dotenv environment variables file
+
+.env*

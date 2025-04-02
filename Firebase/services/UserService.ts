@@ -11,19 +11,18 @@ import {
   setDocument,
   processDocumentData,
 } from '@/Firebase/firestoreHelper';
-
+import { Timestamp } from 'firebase/firestore';
 // User profile interface
 export interface UserProfile {
   id: string;
   username: string;
   email: string;
   photoURL?: string;
-  createdAt: Date;
-  lastLogin: Date;
+  createdAt: Timestamp;
+  lastLogin: Timestamp[];
   notificationPreferences: {
     categories: string[];
     radius: number;
-    notifyOnAll: boolean;
   };
 }
 
@@ -34,17 +33,16 @@ export const createUserProfile = async (
   username?: string
 ): Promise<boolean> => {
   try {
-    const now = new Date();
+    const now = Timestamp.now();
 
     const userData = {
       username: username || email.split('@')[0], // Default username from email if not provided
       email,
       createdAt: now,
-      lastLogin: now,
+      lastLogin: [now, now],
       notificationPreferences: {
-        categories: ['Traffic', 'Safety', 'Event', 'Infrastructure'],
-        radius: 5, // Default 5km/mi radius
-        notifyOnAll: false,
+        categories: [],
+        radius: 0,
       },
     };
 
@@ -65,18 +63,17 @@ export const getUserProfile = async (
     if (!doc) return null;
 
     const processedData = processDocumentData(doc);
-
+    console.log(processedData.lastLogin);
     return {
       id: doc.id,
       username: processedData.username || '',
       email: processedData.email || '',
       photoURL: processedData.photoURL,
-      createdAt: processedData.createdAt,
-      lastLogin: processedData.lastLogin,
+      createdAt: doc.createdAt,
+      lastLogin: doc.lastLogin,
       notificationPreferences: processedData.notificationPreferences || {
         categories: [],
-        radius: 5,
-        notifyOnAll: false,
+        radius: 0,
       },
     };
   } catch (error) {
@@ -91,8 +88,8 @@ export const updateUserProfile = async (
   updates: Partial<UserProfile>
 ): Promise<boolean> => {
   try {
-    // Don't allow updating id, email, or createdAt
-    const { id, email, createdAt, ...validUpdates } = updates;
+    // only allow update username,and lastLogin
+    const { ...validUpdates } = updates;
 
     return await updateDocument(COLLECTIONS.USERS, userId, validUpdates);
   } catch (error) {
@@ -168,6 +165,21 @@ export const createOrUpdateUser = async (
     }
   } catch (error) {
     console.error('Error creating or updating user:', error);
+    return false;
+  }
+};
+
+// Store a user's push notification token
+export const updateUserPushToken = async (
+  userId: string,
+  pushToken: string
+): Promise<boolean> => {
+  try {
+    return await updateDocument(COLLECTIONS.USERS, userId, {
+      pushToken: pushToken,
+    });
+  } catch (error) {
+    console.error('Error updating push token:', error);
     return false;
   }
 };

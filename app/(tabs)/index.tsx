@@ -3,20 +3,25 @@
  * Integrates the content header and public posts list components.
  */
 
-import { StyleSheet, View, Text } from "react-native";
-import MyWeather from "@/components/MyWeather";
+import { StyleSheet, View } from "react-native";
 import { PublicContentHeader } from "@/components/public/PublicContentHeader";
 import { PublicPostsList } from "@/components/public/PublicPostsList";
+import { setNotificationHandler } from "expo-notifications";
+
+setNotificationHandler({
+  handleNotification: async () => {
+    return {
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: true,
+    };
+  },
+});
 
 export default function HomeScreen() {
   return (
     <View style={styles.container}>
-      {/* <Text style={styles.title}>Home Screen</Text>
-      <Text style={styles.subtitle}>Public content available to all users</Text> */}
-      {/* This has been integrated into the PublicPostsList component Now */}
-      {/* <MyWeather /> */}
-
-      <PublicContentHeader />
+      {/* <PublicContentHeader /> */}
       <PublicPostsList />
     </View>
   );

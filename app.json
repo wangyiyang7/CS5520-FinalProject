@@ -23,6 +23,7 @@
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
+      "expo-notifications",
       "expo-router",
       [
         "expo-splash-screen",
@@ -31,6 +32,13 @@
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "The app needs access to your camera.",
+          "photoPermission": "The app needs access to your photo library."
         }
       ],
       [
