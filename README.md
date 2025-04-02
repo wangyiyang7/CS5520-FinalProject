@@ -96,6 +96,13 @@ Stay instantly informed about what's happening right around you with Local Buzz!
 
 ## Yiyang Wang's Contributions by feature branch:
 
+- [**External AI API - Google Cloud Natural Language API** ](https://github.com/wangyiyang7/CS5520-FinalProject/pull/20): Implemented a prototype to categorize user-generated text content.
+- [**Localnotification** ](https://github.com/wangyiyang7/CS5520-FinalProject/pull/21): Implemented local notification.
+- [**Filter by location, radius yet to do.** ](https://github.com/wangyiyang7/CS5520-FinalProject/pull/21): Implemented a geospatial filtering prototype that dynamically displays posts located within a certain radius of the user's current geographic coordinates.
+- [**Add functions to warn the user if weak password is used** ](https://github.com/wangyiyang7/CS5520-FinalProject/pull/21): Added functionality to detect and warn against weak passwords.
+
+<hr style="border: 4px solid black;">
+
 # Iteration 1 Submission
 
 ## Data Model and Collections
