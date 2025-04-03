@@ -54,35 +54,44 @@ Stay instantly informed about what's happening right around you with Local Buzz!
 ```
 
    // Posts collection - public read, authenticated write
-   match /posts/{postId} {
+    match /posts/{postId} {
       // Anyone can read public posts
-      allow read: if resource.data.isPublic == true ||
-                     (request.auth != null && request.auth.uid == resource.data.authorId);
-
+      allow read: if resource.data.isPublic == true || 
+                   (request.auth != null && request.auth.uid == resource.data.authorId);
+      
+      // Anyone can read public posts
+      // allow read: if request.auth == null;
+      
       // Only authenticated users can create posts
-      allow create: if request.auth != null &&
-                      request.auth.uid == request.resource.data.authorId &&
+      allow create: if request.auth != null && 
+                      request.auth.uid == request.resource.data.authorId && 
                       request.resource.data.createdAt is timestamp;
-
+      
       // Only the author can update or delete their own posts
-      allow update, delete: if request.auth != null &&
-                     request.auth.uid == resource.data.authorId;
+      allow update, delete: if request.auth != null && 
+                             request.auth.uid == resource.data.authorId;
     }
-
-   // Users collection - manage own profile
-   match /users/{userId} {
+    
+    // Users collection - manage own profile
+    match /users/{userId} {
       // Anyone can read user profiles
       allow read: if true;
-
+      
       // Users can only write to their own profile
       allow write: if request.auth != null && request.auth.uid == userId;
     }
+    
+    // Notification Collection
+    
+      match /notifications/{notificationId} {
+        // Allow creating notifications for any authenticated user
+        allow create: if request.auth != null;
 
-   // Notifications collection - private to each user
-   match /notifications/{notificationId} {
-      allow read, write: if request.auth != null &&
-                     request.auth.uid == resource.data.userId;
-    }
+        // Only allow users to read/update/delete their own notifications
+        allow read, update, delete: if request.auth != null && 
+                                    request.auth.uid == resource.data.userId;
+    	}
+  
 
 ```
 
