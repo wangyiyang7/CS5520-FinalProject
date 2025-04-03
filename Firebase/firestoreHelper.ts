@@ -193,7 +193,7 @@ export async function queryDocuments(
       // First, get all documents that match the where conditions
       const constraints: QueryConstraint[] = [];
 
-      // Add where conditions
+      //  where conditions
       whereConditions.forEach((condition) => {
         constraints.push(
           where(condition.fieldPath, condition.operator, condition.value)
@@ -206,19 +206,19 @@ export async function queryDocuments(
       // No risk of missing index, use all constraints
       const constraints: QueryConstraint[] = [];
 
-      // Add where conditions
+      //  where conditions
       whereConditions.forEach((condition) => {
         constraints.push(
           where(condition.fieldPath, condition.operator, condition.value)
         );
       });
 
-      // Add orderBy if specified
+      //  orderBy if specified
       if (orderByField) {
         constraints.push(orderBy(orderByField, orderDirection));
       }
 
-      // Add limit if specified
+      //  limit if specified
       if (limit !== null && limit > 0) {
         constraints.push(firebaseLimit(limit));
       }

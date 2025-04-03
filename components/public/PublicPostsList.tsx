@@ -17,10 +17,13 @@ import { PostFilters, FilterState } from '@/components/public/PostFilters';
 import { calculateDistance, getCurrentLocation } from '@/utils/calculateDistance';
 
 import { useFocusEffect, useRouter } from "expo-router";
+import { getUserProfile, UserProfile } from '@/Firebase/services/UserService';
 
 export function PublicPostsList() {
     const [posts, setPosts] = useState<PublicPost[]>([]);
     const [filteredPosts, setFilteredPosts] = useState<PublicPost[]>([]);
+    const [userInfo, setUserInfo] = useState<UserProfile | null>(null);
+    const [userRadius, setUserRadius] = useState<number>(0);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [userLocation, setUserLocation] = useState<{ latitude: number, longitude: number } | null>(null);
@@ -33,14 +36,31 @@ export function PublicPostsList() {
     const [filterState, setFilterState] = useState<FilterState>({
         searchText: '',
         selectedCategories: [],
-        radius: 5,
+        radius: userRadius || 0,
         sortBy: 'newest'
     });
 
     // Load user location
     useEffect(() => {
+
+        // console.log('Loading user===', currentUser);
+
         const getLocation = async () => {
             try {
+
+                if (currentUser?.uid) {
+                    try {
+                        const info = await getUserProfile(currentUser.uid);
+                        setUserRadius(info?.notificationPreferences.radius || 0);
+                        console.log('User info:', info?.notificationPreferences.radius);
+                        setUserInfo(info);
+                    } catch (e) {
+                        console.error("Failed to fetch user profile:", e);
+                    }
+                }
+
+
+
                 const location = await getCurrentLocation();
                 if (location?.coords) {
                     setUserLocation({
@@ -61,7 +81,33 @@ export function PublicPostsList() {
         setLoading(true);
         try {
             // Fetch posts with the current radius filter
-            const fetchedPosts = await fetchPublicPosts(20, filterState.radius);
+            // console.error('fetching.....:', filterState.radius);
+            // console.error('user raduis is.....:', userRadius);
+
+            // const fetchedPosts = await fetchPublicPosts(20, userRadius ? userRadius : filterState.radius);
+
+            // // Extract unique categories from posts
+            // const categories = Array.from(new Set(fetchedPosts.map(post => post.category)));
+            // setAvailableCategories(categories);
+
+            // // Store all posts
+            // setPosts(fetchedPosts);
+
+            // // Apply client-side filters
+            // applyFilters(fetchedPosts);
+
+
+
+            // Determine which radius to use
+            // If user is logged in and has a radius preference, use that
+            // Otherwise use the filter state radius 
+            // If both are 0, fetch all posts without distance filtering
+            const effectiveRadius = 0 //userRadius > 0 ? userRadius : filterState.radius;
+
+            console.log(`Loading posts with radius: ${effectiveRadius}km`);
+            console.log(`User radius: ${userRadius}km, Filter radius: ${filterState.radius}km`);
+
+            const fetchedPosts = await fetchPublicPosts(50, effectiveRadius);
 
             // Extract unique categories from posts
             const categories = Array.from(new Set(fetchedPosts.map(post => post.category)));
@@ -70,8 +116,12 @@ export function PublicPostsList() {
             // Store all posts
             setPosts(fetchedPosts);
 
-            // Apply client-side filters
+            // Apply client-side filters (excluding radius since it's already applied by fetchPublicPosts)
             applyFilters(fetchedPosts);
+
+            console.log(`Loaded ${fetchedPosts.length} posts with ${categories.length} categories`);
+
+
         } catch (error) {
             console.error('Error loading posts:', error);
         } finally {
@@ -80,7 +130,7 @@ export function PublicPostsList() {
     };
 
     // Apply filters to the fetched posts
-    const applyFilters = useCallback((postsToFilter = posts) => {
+    const applyFilters_ = useCallback((postsToFilter = posts) => {
         let result = [...postsToFilter];
 
         // Apply search text filter
@@ -135,6 +185,162 @@ export function PublicPostsList() {
 
         setFilteredPosts(result);
     }, [filterState, posts, userLocation]);
+
+
+
+    // In PublicPostsList.tsx, modify the applyFilters function:
+
+    const applyFilters_o = useCallback((postsToFilter = posts) => {
+        let result = [...postsToFilter];
+
+        // Apply search text filter
+        if (filterState.searchText) {
+            const searchLower = filterState.searchText.toLowerCase();
+            result = result.filter(post =>
+                post.title.toLowerCase().includes(searchLower) ||
+                post.content.toLowerCase().includes(searchLower) ||
+                post.locationName.toLowerCase().includes(searchLower) ||
+                post.category.toLowerCase().includes(searchLower)
+            );
+        }
+
+        // Apply category filter
+        if (filterState.selectedCategories.length > 0) {
+            result = result.filter(post =>
+                filterState.selectedCategories.includes(post.category)
+            );
+        }
+
+        // Check if we should apply radius filter
+        let filteredByRadius = [];
+        if (userLocation) {
+            filteredByRadius = result.filter(post => {
+                if (!post.location || !post.location.latitude || !post.location.longitude) {
+                    return false;
+                }
+
+                const distance = calculateDistance(
+                    userLocation.latitude,
+                    userLocation.longitude,
+                    post.location.latitude,
+                    post.location.longitude
+                );
+
+                return distance <= filterState.radius;
+            });
+
+            // Only apply radius filter if it doesn't filter out all posts
+            if (filteredByRadius.length > 0) {
+                result = filteredByRadius;
+            } else {
+                console.log('Radius filter would remove all posts, ignoring radius constraint');
+            }
+        }
+
+        // Apply sorting
+        switch (filterState.sortBy) {
+            case 'newest':
+                result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+                break;
+            case 'oldest':
+                result.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+                break;
+            case 'popular':
+                result.sort((a, b) => (b.likes + b.verified) - (a.likes + a.verified));
+                break;
+            case 'proximity':
+                if (userLocation) {
+                    result.sort((a, b) => {
+                        if (!a.location || !a.location.latitude || !a.location.longitude) return 1;
+                        if (!b.location || !b.location.latitude || !b.location.longitude) return -1;
+
+                        const distanceA = calculateDistance(
+                            userLocation.latitude,
+                            userLocation.longitude,
+                            a.location.latitude,
+                            a.location.longitude
+                        );
+                        const distanceB = calculateDistance(
+                            userLocation.latitude,
+                            userLocation.longitude,
+                            b.location.latitude,
+                            b.location.longitude
+                        );
+                        return distanceA - distanceB;
+                    });
+                }
+                break;
+        }
+
+        setFilteredPosts(result);
+    }, [filterState, posts, userLocation]);
+
+
+    // Update the applyFilters function to not re-apply radius filtering:
+
+    const applyFilters = useCallback((postsToFilter = posts) => {
+        let result = [...postsToFilter];
+
+        // Apply search text filter
+        if (filterState.searchText) {
+            const searchLower = filterState.searchText.toLowerCase();
+            result = result.filter(post =>
+                post.title.toLowerCase().includes(searchLower) ||
+                post.content.toLowerCase().includes(searchLower) ||
+                post.locationName.toLowerCase().includes(searchLower) ||
+                post.category.toLowerCase().includes(searchLower)
+            );
+        }
+
+        // Apply category filter
+        if (filterState.selectedCategories.length > 0) {
+            result = result.filter(post =>
+                filterState.selectedCategories.includes(post.category)
+            );
+        }
+
+        // Note: We're no longer applying radius filtering here since it's done by fetchPublicPosts
+
+        // Apply sorting
+        switch (filterState.sortBy) {
+            case 'newest':
+                result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+                break;
+            case 'oldest':
+                result.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+                break;
+            case 'popular':
+                result.sort((a, b) => (b.likes + b.verified) - (a.likes + a.verified));
+                break;
+            case 'proximity':
+                if (userLocation) {
+                    result.sort((a, b) => {
+                        if (!a.location || !a.location.latitude || !a.location.longitude) return 1;
+                        if (!b.location || !b.location.latitude || !b.location.longitude) return -1;
+
+                        const distanceA = calculateDistance(
+                            userLocation.latitude,
+                            userLocation.longitude,
+                            a.location.latitude,
+                            a.location.longitude
+                        );
+                        const distanceB = calculateDistance(
+                            userLocation.latitude,
+                            userLocation.longitude,
+                            b.location.latitude,
+                            b.location.longitude
+                        );
+                        return distanceA - distanceB;
+                    });
+                }
+                break;
+        }
+
+        setFilteredPosts(result);
+    }, [filterState, posts, userLocation]);
+
+
+
 
     // Handle refreshing the post list
     const handleRefresh = async () => {

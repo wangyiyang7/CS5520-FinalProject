@@ -59,7 +59,7 @@ export interface CreatePostData {
 }
 
 // Updated function to filter by radius condition
-export const fetchPublicPosts = async (
+export const fetchPublicPosts_ = async (
   limitCount = 10,
   radiusKm = 5 // Add the radius parameter with default 5km
 ): Promise<PublicPost[]> => {
@@ -117,6 +117,221 @@ export const fetchPublicPosts = async (
 
     // Map the results to the PublicPost interface
     const posts: PublicPost[] = results_refined.map((doc) => {
+      const processedData = processDocumentData(doc);
+
+      return {
+        id: doc.id,
+        title: processedData.title || 'Untitled Post',
+        content: processedData.content || '',
+        category: processedData.category || 'General',
+        createdAt: processedData.createdAt,
+        locationName: processedData.locationName || 'Unknown location',
+        location: processedData.location || {
+          latitude: 0,
+          longitude: 0,
+        },
+        authorId: processedData.authorId || '',
+        authorName: processedData.authorName || 'Anonymous',
+        photoURL: processedData.photoURL,
+        isPublic: processedData.isPublic || true,
+        likes: processedData.likes || 0,
+        verified: processedData.verified || 0,
+      };
+    });
+
+    return posts;
+  } catch (error) {
+    console.error('Error fetching public posts:', error);
+    return [];
+  }
+};
+
+export const fetchPublicPosts_o = async (
+  limitCount = 10,
+  radiusKm = 5 // Add the radius parameter with default 5km
+): Promise<PublicPost[]> => {
+  try {
+    const myLocation = await getCurrentLocation();
+    const { latitude, longitude } = myLocation?.coords || {
+      latitude: 38.8977,
+      longitude: -77.0365,
+    };
+    console.log(latitude, longitude);
+
+    console.log('Fetching public posts...');
+
+    // Define query parameters
+    const whereConditions: QueryParams[] = [
+      { fieldPath: 'isPublic', operator: '==', value: true },
+    ];
+
+    console.log('Querying documents from posts in fetchPublicPosts');
+
+    // Query the posts
+    const results = await queryDocuments(
+      COLLECTIONS.POSTS,
+      whereConditions,
+      'createdAt',
+      'desc',
+      limitCount
+    );
+
+    // Safety check for empty results
+    if (results.length === 0) {
+      console.log('No posts found in database');
+      return [];
+    }
+
+    console.log(`Fetched ${results.length} posts`);
+
+    // Calculate distance for each post but don't filter them out
+    const postsWithDistance = results.map((post) => {
+      // Skip posts with invalid location data
+      if (
+        !post.location ||
+        typeof post.location.latitude !== 'number' ||
+        typeof post.location.longitude !== 'number'
+      ) {
+        console.log('Post with invalid location data:', post.id);
+        return {
+          ...post,
+          distance: Infinity,
+        };
+      }
+
+      const postLat = post.location.latitude;
+      const postLon = post.location.longitude;
+      const distance = calculateDistance(latitude, longitude, postLat, postLon);
+
+      return {
+        ...post,
+        distance: distance,
+      };
+    });
+
+    // Sort posts by distance but don't filter any out
+    const sortedPosts = postsWithDistance.sort((a, b) => {
+      // Handle infinity values for invalid locations
+      if (a.distance === Infinity) return 1;
+      if (b.distance === Infinity) return -1;
+      return a.distance - b.distance;
+    });
+
+    // Map the results to the PublicPost interface
+    const posts: PublicPost[] = sortedPosts.map((doc) => {
+      const processedData = processDocumentData(doc);
+
+      return {
+        id: doc.id,
+        title: processedData.title || 'Untitled Post',
+        content: processedData.content || '',
+        category: processedData.category || 'General',
+        createdAt: processedData.createdAt,
+        locationName: processedData.locationName || 'Unknown location',
+        location: processedData.location || {
+          latitude: 0,
+          longitude: 0,
+        },
+        authorId: processedData.authorId || '',
+        authorName: processedData.authorName || 'Anonymous',
+        photoURL: processedData.photoURL,
+        isPublic: processedData.isPublic || true,
+        likes: processedData.likes || 0,
+        verified: processedData.verified || 0,
+      };
+    });
+
+    return posts;
+  } catch (error) {
+    console.error('Error fetching public posts:', error);
+    return [];
+  }
+};
+
+export const fetchPublicPosts = async (
+  limitCount = 10,
+  radiusKm = 0 // Changed default to 0 to indicate "show all"
+): Promise<PublicPost[]> => {
+  try {
+    const myLocation = await getCurrentLocation();
+    const { latitude, longitude } = myLocation?.coords || {
+      latitude: 38.8977,
+      longitude: -77.0365,
+    };
+    console.log(latitude, longitude);
+
+    console.log('Fetching public posts...');
+
+    // Define query parameters
+    const whereConditions: QueryParams[] = [
+      { fieldPath: 'isPublic', operator: '==', value: true },
+    ];
+
+    console.log('Querying documents from posts in fetchPublicPosts');
+
+    // Query the posts
+    const results = await queryDocuments(
+      COLLECTIONS.POSTS,
+      whereConditions,
+      'createdAt',
+      'desc',
+      limitCount * 2 // Get more posts initially to account for filtering
+    );
+
+    // Safety check for empty results
+    if (results.length === 0) {
+      console.log('No posts found in database');
+      return [];
+    }
+
+    console.log(`Fetched ${results.length} posts from database`);
+
+    let filteredResults = [...results];
+
+    // Only apply radius filtering if radiusKm > 0
+    if (radiusKm > 0 && myLocation && myLocation.coords) {
+      console.log(`Filtering posts by radius: ${radiusKm}km`);
+
+      // Filter using the provided radius parameter
+      filteredResults = results.filter((post) => {
+        // Skip posts with invalid location data
+        if (
+          !post.location ||
+          typeof post.location.latitude !== 'number' ||
+          typeof post.location.longitude !== 'number'
+        ) {
+          console.log('Skipping post with invalid location data:', post.id);
+          return false;
+        }
+
+        const postLat = post.location.latitude;
+        const postLon = post.location.longitude;
+        const distance = calculateDistance(
+          latitude,
+          longitude,
+          postLat,
+          postLon
+        );
+        return distance <= radiusKm;
+      });
+
+      // If radius filter would remove all posts, log this but keep the filtered result
+      // This preserves the user's intention to filter by radius
+      if (filteredResults.length === 0) {
+        console.log(
+          'Radius filter removed all posts, but respecting user preference'
+        );
+      }
+    } else {
+      console.log('Not applying radius filter (radius = 0 or no location)');
+    }
+
+    // Limit the number of posts to return
+    const postsToReturn = filteredResults.slice(0, limitCount);
+    console.log(`Returning ${postsToReturn.length} posts after filtering`);
+
+    // Map the results to the PublicPost interface
+    const posts: PublicPost[] = postsToReturn.map((doc) => {
       const processedData = processDocumentData(doc);
 
       return {

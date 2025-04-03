@@ -10,7 +10,8 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   Animated,
-  Dimensions
+  Dimensions,
+  Platform
 } from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { fetchPublicPosts, PublicPost } from "@/Firebase/services/PostService";
@@ -169,7 +170,7 @@ export default function MapScreen() {
   return (
     <View style={styles.container}>
       <MapView
-        provider={PROVIDER_GOOGLE}
+        // provider={PROVIDER_GOOGLE}
         style={styles.map}
         initialRegion={{
           latitude: filteredPosts.length > 0 ? filteredPosts[0].location.latitude : 37.78825,
@@ -310,6 +311,8 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: '#eee',
     backgroundColor: 'white',
+    zIndex: 10, // this is for proper layering
+    paddingBottom: Platform.OS === 'ios' ? 49 : 0,
   },
   controllerWrapper: {
     flex: 1,
@@ -327,7 +330,7 @@ const styles = StyleSheet.create({
   // Detail panel styles
   detailPanel: {
     position: 'absolute',
-    bottom: 0,
+    // bottom: 0,
     left: 0,
     right: 0,
     backgroundColor: 'white',
@@ -338,7 +341,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 5,
     elevation: 10,
-    overflow: 'hidden'
+    overflow: 'hidden',
+    bottom: Platform.OS === 'ios' ? 55 : 0, // Adjust for iOS
+    zIndex: 15,
+
   },
   panelContent: {
     padding: 15,
