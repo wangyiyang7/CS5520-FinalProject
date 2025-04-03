@@ -152,11 +152,11 @@ export default function Alarm() {
       >
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
-            <Text style={styles.modalTitle}>Set Notification</Text>
+            <Text style={styles.modalTitle}>Hey, don't forget this...</Text>
 
             <TextInput
               style={styles.input}
-              placeholder="Enter notification message"
+              placeholder="I should definitely not forget to..."
               value={alarmMessage}
               onChangeText={setAlarmMessage}
               multiline

@@ -163,11 +163,28 @@ export function PostFilters({
                             </View>
                         ))}
 
-                        {filterState.radius !== 5 && (
+                        {/* {filterState.radius !== 5 && (
+                            <View style={styles.pill}>
+                                <Text style={styles.pillText}>{filterState.radius}km radius</Text>
+                            </View>
+                        )} */}
+
+                        {filterState.radius > 0 && (
                             <View style={styles.pill}>
                                 <Text style={styles.pillText}>{filterState.radius}km radius</Text>
                             </View>
                         )}
+
+                        {/* {filterState.radius > 0 ? (
+  <View style={styles.pill}>
+    <Text style={styles.pillText}>{filterState.radius}km radius</Text>
+  </View>
+) : (
+  <View style={styles.pill}>
+    <Text style={styles.pillText}>All posts</Text>
+  </View>
+)} */}
+
 
                         {filterState.sortBy !== 'newest' && (
                             <View style={styles.pill}>
@@ -249,8 +266,31 @@ export function PostFilters({
 
                         {/* Radius Section */}
                         <View style={styles.filterSection}>
-                            <Text style={styles.sectionTitle}>Distance (km): {tempFilterState.radius}km</Text>
+                            {/* <Text style={styles.sectionTitle}>Distance (km): {tempFilterState.radius}km</Text> */}
+
+
+                            <Text style={styles.sectionTitle}>
+                                Distance: {tempFilterState.radius > 0 ? `${tempFilterState.radius}km` : 'All posts'}
+                            </Text>
+
+
                             <Slider
+                                style={styles.slider}
+                                minimumValue={0}  // Changed from 1 to 0
+                                maximumValue={20}
+                                step={1}
+                                value={tempFilterState.radius}
+                                onValueChange={handleRadiusChange}
+                                minimumTrackTintColor={Colors.light.tint}
+                                maximumTrackTintColor="#ddd"
+                                thumbTintColor={Colors.light.tint}
+                            />
+                            <View style={styles.sliderLabels}>
+                                <Text style={styles.sliderLabel}>All</Text>
+                                <Text style={styles.sliderLabel}>20km</Text>
+                            </View>
+
+                            {/* <Slider
                                 style={styles.slider}
                                 minimumValue={1}
                                 maximumValue={20}
@@ -264,7 +304,7 @@ export function PostFilters({
                             <View style={styles.sliderLabels}>
                                 <Text style={styles.sliderLabel}>1km</Text>
                                 <Text style={styles.sliderLabel}>20km</Text>
-                            </View>
+                            </View> */}
                         </View>
 
                         {/* Sort Options */}
@@ -411,7 +451,7 @@ const styles = StyleSheet.create({
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
         padding: 20,
-        maxHeight: '80%',
+        maxHeight: Platform.OS === 'ios' ? '95%' : '80%',
     },
     modalHeader: {
         flexDirection: 'row',
