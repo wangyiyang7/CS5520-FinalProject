@@ -29,6 +29,12 @@ Stay instantly informed about what's happening right around you with Local Buzz!
 
 ### Work Updates for branch (interactive-map-view) Carlos
 
+|               Map Posts with markers                |
+| :-------------------------------------------------: |
+| <img src="./screenshots/map-posts.jpg" width="250"> |
+
+
+
 1. Implemented interactive map view with custom markers, allowing users to explore posts geographically with a sliding panel interface for post previews
 2. Created MapController component to provide filtering functionality by category, improving user experience when navigating posts
 3. Enhanced both post creation and edit screens to automatically generate categories based on content changes using the Google Cloud Natural Language API that was initially integrated by my colleague as our AI API integration.
@@ -36,6 +42,12 @@ Stay instantly informed about what's happening right around you with Local Buzz!
    reusable in other components.
 
 ### Work Updates for branch (search-post-by-text-category-distance-time) Carlos
+
+|                      Post Search                      |
+| :---------------------------------------------------: |
+| <img src="./screenshots/post-search.jpg" width="250"> |
+
+
 
 `Setting up firebase rules for the project`
 
