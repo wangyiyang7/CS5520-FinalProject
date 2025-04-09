@@ -263,9 +263,10 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   modalTitle: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: "bold",
-    marginBottom: 15,
+    color: "#0a7ea4",
+    marginBottom: 20,
   },
   dateTimeDisplay: {
     marginVertical: 10,
@@ -286,12 +287,12 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   cancelButton: {
-    backgroundColor: "#888",
+    backgroundColor: "#e0e0e0",
     flex: 1,
     marginRight: 5,
   },
   setButton: {
-    backgroundColor: "#4CAF50",
+    backgroundColor: "#0a7ea4",
     flex: 1,
     marginLeft: 5,
   },

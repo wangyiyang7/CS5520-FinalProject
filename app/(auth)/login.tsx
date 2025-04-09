@@ -6,6 +6,7 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
+  Image,
 } from "react-native";
 import { useState } from "react";
 import { useRouter } from "expo-router";
@@ -65,7 +66,7 @@ export default function login() {
       await sendPasswordResetEmail(auth, email);
       alert("Reset email sent, check your email.");
     } catch (error) {
-      alert("Enter Email");
+      alert("Enter Email!");
     }
   };
 
@@ -74,13 +75,24 @@ export default function login() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.container}
     >
-      <Text style={styles.title}>Login</Text>
+      <View style={styles.header}>
+        <Text style={styles.title}>Log in to</Text>
+        <Image
+          source={{
+            uri: Image.resolveAssetSource(require("@/assets/images/logo.png"))
+              .uri,
+          }}
+          style={styles.logo}
+          resizeMode="contain"
+        />
+      </View>
 
       {error ? <Text style={styles.error}>{error}</Text> : null}
 
       <TextInput
         style={styles.input}
         placeholder="Email"
+        placeholderTextColor="#6C7A89"
         value={email}
         onChangeText={setEmail}
         autoCapitalize="none"
@@ -90,13 +102,14 @@ export default function login() {
       <TextInput
         style={styles.input}
         placeholder="Password"
+        placeholderTextColor="#6C7A89"
         value={password}
         onChangeText={setPassword}
         secureTextEntry
       />
 
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
-        <Text style={styles.buttonText}>Log In</Text>
+        <Text style={styles.buttonText}>LOG IN</Text>
       </TouchableOpacity>
 
       <View style={styles.registerContainer}>
@@ -120,53 +133,76 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "center",
-    padding: 20,
+    padding: 24,
+    backgroundColor: "#FFFFFF",
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    justifyContent: "flex-start",
+    marginBottom: 5,
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: "bold",
+    color: "#0a7ea4",
     marginBottom: 20,
-    textAlign: "center",
+  },
+  logo: {
+    width: 150,
+    height: 150,
   },
   input: {
+    backgroundColor: "#F5F7FA",
     borderWidth: 1,
-    borderColor: "#ddd",
-    padding: 10,
+    borderColor: "#E4E9F0",
+    padding: 16,
     fontSize: 16,
-    borderRadius: 6,
-    marginBottom: 15,
+    borderRadius: 8,
+    marginBottom: 16,
+    color: "#2C3E50",
   },
   button: {
-    backgroundColor: "#2196F3",
-    padding: 15,
-    borderRadius: 6,
-    marginTop: 10,
+    backgroundColor: "#0a7ea4",
+    padding: 16,
+    borderRadius: 25,
+    marginTop: 12,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   buttonText: {
-    color: "white",
+    color: "#FFFFFF",
     textAlign: "center",
-    fontWeight: "bold",
+    fontWeight: "700",
     fontSize: 16,
   },
   error: {
-    color: "red",
-    marginBottom: 15,
+    color: "#e0e0e0",
+    marginBottom: 16,
     textAlign: "center",
+    fontSize: 14,
   },
   registerContainer: {
     flexDirection: "row",
     justifyContent: "center",
-    marginTop: 20,
+    marginTop: 24,
   },
   registerText: {
-    color: "#2196F3",
-    fontWeight: "bold",
+    color: "#0a7ea4",
+    fontWeight: "700",
   },
   backButton: {
-    marginTop: 20,
+    marginTop: 24,
     alignItems: "center",
   },
   backText: {
-    color: "#555",
+    color: "#6C7A89",
+    fontSize: 14,
   },
 });

@@ -5,7 +5,8 @@ import {
   UserProfile,
 } from "@/Firebase/services/UserService";
 import { useContext, useEffect, useState } from "react";
-import { Image, StyleSheet, Platform, View, Text, Button } from "react-native";
+import { Image, StyleSheet, View, Text, TouchableOpacity } from "react-native";
+import { FontAwesome } from "@expo/vector-icons"; // Import FontAwesome for icons
 import EditUsernameModal from "@/components/EditUsernameModal";
 import ChangePasswordModal from "@/components/ChangePasswordModal";
 import NotificationSettingsModal from "@/components/NotificationSettingsModal";
@@ -81,6 +82,7 @@ export default function ProfileScreen() {
   const handleChangePassword = () => {
     setIsChangePasswordVisible(true);
   };
+
   const handleCancelChangePassword = () => {
     setIsChangePasswordVisible(false);
   };
@@ -120,65 +122,60 @@ export default function ProfileScreen() {
               uri: userInfo.photoURL
                 ? userInfo.photoURL
                 : Image.resolveAssetSource(
-                  require("@/assets/images/profile.jpg")
-                ).uri,
+                    require("@/assets/images/profile.jpg")
+                  ).uri,
             }}
             style={styles.profileImage}
           />
           <View style={styles.textContainer}>
-            {/* <Text style={styles.username}>{userInfo.username}</Text>
-            <Text style={styles.email}>Email: {userInfo.email}</Text>
-            <Text style={styles.createdAt}>
-              Member since: {userInfo.createdAt?.toDate().toLocaleString()}
+            <Text style={styles.username}>
+              {userInfo?.username || "Username not set"}
             </Text>
-            <Text style={styles.lastLogin}>
-              Last Login: {userInfo.lastLogin[0]?.toDate().toLocaleString()}
-            </Text> */}
-
-
-
-            <Text style={styles.username}>{userInfo?.username || "Username not set"}</Text>
-            <Text style={styles.email}>Email: {userInfo?.email || "Email not available"}</Text>
+            <Text style={styles.email}>
+              Email: {userInfo?.email || "Email not available"}
+            </Text>
             <Text style={styles.createdAt}>
-              Member since: {userInfo?.createdAt && typeof userInfo.createdAt.toDate === 'function'
+              Member since:{" "}
+              {userInfo?.createdAt &&
+              typeof userInfo.createdAt.toDate === "function"
                 ? userInfo.createdAt.toDate().toLocaleString()
                 : "Date not available"}
             </Text>
             <Text style={styles.lastLogin}>
-              Last Login: {userInfo?.lastLogin && Array.isArray(userInfo.lastLogin) && userInfo.lastLogin.length > 0
-                && typeof userInfo.lastLogin[0].toDate === 'function'
+              Last Login:{" "}
+              {userInfo?.lastLogin &&
+              Array.isArray(userInfo.lastLogin) &&
+              userInfo.lastLogin.length > 0 &&
+              typeof userInfo.lastLogin[0].toDate === "function"
                 ? userInfo.lastLogin[0].toDate().toLocaleString()
                 : "Login date not available"}
             </Text>
-
-
-
-
           </View>
         </View>
       )}
       <View style={styles.buttonContainer}>
-        <View style={styles.button}>
-          <Button title="Edit Username" onPress={handleEditUsername} />
-        </View>
-        <View style={styles.button}>
-          <Button
-            title="Edit Profile Picture"
-            onPress={handleEditProfilePicture}
-          />
-        </View>
-        <View style={styles.button}>
-          <Button title="Change Password" onPress={handleChangePassword} />
-        </View>
-        <View style={styles.button}>
-          <Button
-            title="Notification Settings"
-            onPress={handleNotificationSettings}
-          />
-        </View>
-        {/*<View style={styles.button}>
-          <Button title="My Posts" onPress={() => {}} />
-        </View>*/}
+        <TouchableOpacity style={styles.button} onPress={handleEditUsername}>
+          <FontAwesome name="user" size={20} color="#FFFFFF" />
+          <Text style={styles.buttonText}>Edit Username</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={handleEditProfilePicture}
+        >
+          <FontAwesome name="camera" size={20} color="#FFFFFF" />
+          <Text style={styles.buttonText}>Edit Profile Picture</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.button} onPress={handleChangePassword}>
+          <FontAwesome name="lock" size={20} color="#FFFFFF" />
+          <Text style={styles.buttonText}>Change Password</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={handleNotificationSettings}
+        >
+          <FontAwesome name="bell" size={20} color="#FFFFFF" />
+          <Text style={styles.buttonText}>Notification Settings</Text>
+        </TouchableOpacity>
       </View>
       {userInfo && (
         <EditUsernameModal
@@ -221,17 +218,16 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
+    backgroundColor: "#FFFFFF",
   },
   profileContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 20,
+    marginBottom: 10,
+    alignItems: "flex-start",
   },
   profileImage: {
-    width: 100,
-    height: 100,
+    width: 130,
+    height: 130,
     borderRadius: 50,
-    marginRight: 20,
   },
   textContainer: {
     alignItems: "flex-start",
@@ -257,12 +253,29 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     width: "100%",
-    flexDirection: "column",
-    alignItems: "center",
     marginTop: 20,
   },
   button: {
-    width: "80%",
-    marginBottom: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#0a7ea4",
+    padding: 16,
+    borderRadius: 25,
+    marginBottom: 12,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  buttonText: {
+    color: "#FFFFFF",
+    fontWeight: "700",
+    fontSize: 16,
+    marginLeft: 10,
   },
 });
