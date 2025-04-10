@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Modal, View, Text, Button, StyleSheet, TextInput } from "react-native";
+import {
+  Modal,
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  TextInput,
+} from "react-native";
 import Checkbox from "expo-checkbox";
 
 interface NotificationSettingsModalProps {
@@ -32,6 +39,7 @@ const NotificationSettingsModal: React.FC<NotificationSettingsModalProps> = ({
         : [...prevCategories, category]
     );
   };
+
   return (
     <Modal visible={visible} animationType="slide" transparent={true}>
       <View style={styles.modalContainer}>
@@ -54,7 +62,7 @@ const NotificationSettingsModal: React.FC<NotificationSettingsModalProps> = ({
                   style={styles.checkbox}
                   value={categories.includes(category)}
                   onValueChange={() => toggleCategory(category)}
-                  color={categories.includes(category) ? "#4630EB" : undefined}
+                  color={categories.includes(category) ? "#0a7ea4" : undefined}
                 />
                 <Text style={styles.checkboxLabel}>{category}</Text>
               </View>
@@ -69,17 +77,22 @@ const NotificationSettingsModal: React.FC<NotificationSettingsModalProps> = ({
               value={radius}
               onChangeText={setRadius}
               placeholder="Enter radius"
+              placeholderTextColor="#6C7A89"
               keyboardType="numeric"
             />
           </View>
           <View style={styles.buttonContainer}>
-            <Button title="Cancel" onPress={onCancel} />
-            <Button
-              title="Confirm"
+            <TouchableOpacity style={styles.cancelButton} onPress={onCancel}>
+              <Text style={styles.buttonText}>Cancel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.confirmButton}
               onPress={() =>
                 onConfirm({ categories, radius: parseFloat(radius) })
               }
-            />
+            >
+              <Text style={styles.buttonText}>Confirm</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </View>
@@ -92,56 +105,88 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: "rgba(0, 0, 0, 0.5)", // Semi-transparent background
   },
   modalContent: {
-    width: "80%",
+    width: "90%",
     padding: 20,
     backgroundColor: "white",
-    borderRadius: 10,
+    borderRadius: 15,
     alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5, // For Android shadow
   },
   title: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: "bold",
+    color: "#0a7ea4", // Consistent with profile screen
     marginBottom: 20,
   },
   checkboxContainer: {
     width: "100%",
-    marginBottom: 5,
+    marginBottom: 20,
   },
   checkbox: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 5,
+    marginBottom: 10,
   },
   checkboxLabel: {
     marginLeft: 10, // Add margin between checkbox and label
+    fontSize: 16,
+    color: "#2C3E50",
   },
   description: {
     width: "100%",
     marginBottom: 10,
+    fontSize: 16,
+    color: "#2C3E50",
   },
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 20,
-  },
-  inputLabel: {
-    marginLeft: 10,
-    marginRight: 10,
+    width: "100%",
   },
   input: {
     flex: 1,
-    padding: 10,
+    padding: 12,
     borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 5,
+    borderColor: "#E4E9F0",
+    borderRadius: 8,
+    backgroundColor: "#F5F7FA",
+    fontSize: 16,
+    color: "#2C3E50",
   },
   buttonContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     width: "100%",
+    marginTop: 20,
+  },
+  cancelButton: {
+    flex: 1,
+    backgroundColor: "#e0e0e0", // Red for cancel
+    padding: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    marginRight: 10,
+  },
+  confirmButton: {
+    flex: 1,
+    backgroundColor: "#0a7ea4", // Consistent blue for confirm
+    padding: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    marginLeft: 10,
+  },
+  buttonText: {
+    color: "#FFFFFF",
+    fontWeight: "700",
+    fontSize: 16,
   },
 });
 

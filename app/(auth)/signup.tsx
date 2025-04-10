@@ -1,4 +1,11 @@
-import { StyleSheet, Text, View, TextInput, Button } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  TextInput,
+  TouchableOpacity,
+  Image,
+} from "react-native";
 import React, { useState } from "react";
 import { useRouter } from "expo-router";
 import { createUserWithEmailAndPassword } from "firebase/auth";
@@ -44,10 +51,8 @@ const signup = () => {
   const router = useRouter();
 
   const handleSignUp = async () => {
-    // Reset error
     setPasswordError("");
 
-    // Check password strength before creating account
     if (!isPasswordStrong(password)) {
       setPasswordError(getPasswordStrengthMessage(password));
       return;
@@ -62,7 +67,6 @@ const signup = () => {
       const user = userCredential.user;
       console.log(user.uid);
       const newUser = await createUserProfile(user.uid, email, username);
-
       router.replace("/(tabs)");
     } catch (error) {
       const errorCode = (error as any).code;
@@ -73,6 +77,14 @@ const signup = () => {
 
   return (
     <View style={styles.container}>
+      <Image
+        source={{
+          uri: Image.resolveAssetSource(require("@/assets/images/logo.png"))
+            .uri,
+        }}
+        style={styles.logo}
+        resizeMode="contain"
+      />
       <Text style={styles.title}>Sign Up</Text>
       <TextInput
         style={styles.input}
@@ -98,14 +110,16 @@ const signup = () => {
           setPasswordError(getPasswordStrengthMessage(text));
         }}
       />
-      {passwordError ? (
-        <Text style={styles.errorText}>{passwordError}</Text>
-      ) : null}
-      <Button title="Sign Up" onPress={handleSignUp} />
-      <Button
-        title="Back to Login"
-        onPress={() => router.replace("/(auth)/login")}
-      />
+      {passwordError ? <Text style={styles.error}>{passwordError}</Text> : null}
+      <TouchableOpacity style={styles.button} onPress={handleSignUp}>
+        <Text style={styles.buttonText}>SIGN UP</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.backButton}
+        onPress={() => router.replace("/(tabs)")}
+      >
+        <Text style={styles.backText}>Back to Home</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -115,23 +129,63 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "center",
-    padding: 16,
+    padding: 24,
+    backgroundColor: "#FFFFFF",
+  },
+  logo: {
+    width: 150,
+    height: 150,
+    alignSelf: "center",
   },
   title: {
-    fontSize: 24,
-    marginBottom: 16,
+    fontSize: 28,
+    marginBottom: 32,
     textAlign: "center",
+    fontWeight: "bold",
+    color: "#0a7ea4",
   },
   input: {
-    height: 40,
-    borderColor: "gray",
+    backgroundColor: "#F5F7FA",
     borderWidth: 1,
-    marginBottom: 12,
-    paddingLeft: 8,
+    borderColor: "#E4E9F0",
+    padding: 16,
+    fontSize: 16,
+    borderRadius: 8,
+    marginBottom: 16,
+    color: "#2C3E50",
   },
-  errorText: {
-    color: "red",
-    marginBottom: 12,
+  button: {
+    backgroundColor: "#0a7ea4",
+    padding: 16,
+    borderRadius: 25,
+    marginTop: 12,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  buttonText: {
+    color: "#FFFFFF",
     textAlign: "center",
+    fontWeight: "700",
+    fontSize: 16,
+  },
+  error: {
+    color: "#e0e0e0",
+    marginBottom: 16,
+    textAlign: "center",
+    fontSize: 14,
+  },
+  backButton: {
+    marginTop: 24,
+    alignItems: "center",
+  },
+  backText: {
+    color: "#6C7A89",
+    fontSize: 14,
   },
 });

@@ -12,8 +12,6 @@ import { useContext } from "react";
 import Alarm from "@/components/Alarm";
 
 export default function TabLayout() {
-
-
   const colorScheme = useColorScheme();
   const router = useRouter();
   const { currentUser } = useContext(AuthContext);

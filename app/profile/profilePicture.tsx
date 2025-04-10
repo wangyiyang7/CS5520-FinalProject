@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Button, StyleSheet, Modal } from "react-native";
+import { View, TouchableOpacity, Text, StyleSheet, Modal } from "react-native";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import ImageManager from "@/components/ImageManager";
 
@@ -38,11 +38,20 @@ const ProfilePictureModal: React.FC<ProfilePictureModalProps> = ({
   };
 
   return (
-    <Modal visible={visible} animationType="slide">
-      <View style={styles.container}>
-        <ImageManager imageUriHandler={imageUriHandler} />
-        {imageURI && <Button title="Upload Image" onPress={uploadImage} />}
-        <Button title="Cancel" onPress={onClose} />
+    <Modal visible={visible} animationType="slide" transparent={true}>
+      <View style={styles.modalContainer}>
+        <View style={styles.modalContent}>
+          <Text style={styles.title}>Edit Profile Picture</Text>
+          <ImageManager imageUriHandler={imageUriHandler} />
+          {imageURI && (
+            <TouchableOpacity style={styles.uploadButton} onPress={uploadImage}>
+              <Text style={styles.buttonText}>Upload Image</Text>
+            </TouchableOpacity>
+          )}
+          <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
+            <Text style={styles.buttonText}>Cancel</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </Modal>
   );
@@ -51,9 +60,49 @@ const ProfilePictureModal: React.FC<ProfilePictureModalProps> = ({
 export default ProfilePictureModal;
 
 const styles = StyleSheet.create({
-  container: {
+  modalContainer: {
     flex: 1,
-    alignItems: "center",
     justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)", // Semi-transparent background
+  },
+  modalContent: {
+    width: "90%",
+    padding: 20,
+    backgroundColor: "white",
+    borderRadius: 15,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5, // For Android shadow
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#0a7ea4", // Consistent with profile screen
+    marginBottom: 20,
+  },
+  uploadButton: {
+    backgroundColor: "#0a7ea4", // Consistent blue for upload
+    padding: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    marginTop: 20,
+    width: "100%",
+  },
+  cancelButton: {
+    backgroundColor: "#e0e0e0", // Red for cancel
+    padding: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    marginTop: 10,
+    width: "100%",
+  },
+  buttonText: {
+    color: "#FFFFFF",
+    fontWeight: "700",
+    fontSize: 16,
   },
 });
