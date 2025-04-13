@@ -40,9 +40,12 @@ To Build Android APK through EAS Build eas `build -p android --profile preview`
 
 ## Yiyang Wang's Contributions:
 
+- [**Update stylings** ](https://github.com/wangyiyang7/CS5520-FinalProject/pull/33): Update stylings of a few screens.
 
 
-
+|               App Installed on Android                |
+| :---------------------------------------------------: |
+| <img src="./screenshots/login-v2.png" width="250"> |
 
 
 
