@@ -13,7 +13,7 @@ import {
   Dimensions,
   Platform
 } from "react-native";
-import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
+import MapView, { Marker, PROVIDER_GOOGLE, PROVIDER_DEFAULT } from "react-native-maps";
 import { fetchPublicPosts, PublicPost } from "@/Firebase/services/PostService";
 import { useRouter, useFocusEffect } from "expo-router";
 import { Colors } from "@/constants/Colors";
@@ -170,7 +170,7 @@ export default function MapScreen() {
   return (
     <View style={styles.container}>
       <MapView
-        // provider={PROVIDER_GOOGLE}
+        provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : PROVIDER_DEFAULT}
         style={styles.map}
         initialRegion={{
           latitude: filteredPosts.length > 0 ? filteredPosts[0].location.latitude : 37.78825,

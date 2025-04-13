@@ -4,18 +4,45 @@
     "slug": "local-buzz",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/logo2.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "buildNumber": "1.0.0",
+      "infoPlist": {
+        "UIBackgroundModes": [
+          "remote-notification"
+        ],
+        "NSLocationWhenInUseUsageDescription": "This app needs access to location services to show your current location on the map.",
+        "NSLocationAlwaysUsageDescription": "This app needs access to location services to show your current location on the map."
+      },
+      "config": {
+        "googleMapsApiKey": "AIzaSyCytsuOO0hx-2uB3jV-dDUMIzABuMNV0XQ"
+      }
     },
     "android": {
+      "version": "1.0.0",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./assets/images/logo2.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.RECORD_AUDIO"
+      ],
+      "package": "com.localbuzz.spring2025",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyDLBh6YQgnAvDJNNyB07ItbRZYkG9YT44I"
+        }
+      },
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "bundler": "metro",
@@ -28,7 +55,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
+          "image": "./assets/images/logo2.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
@@ -50,6 +77,14 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "723db9c2-150e-4843-9649-de3f5c3972e9"
+      }
     }
   }
 }

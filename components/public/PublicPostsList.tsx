@@ -36,7 +36,7 @@ export function PublicPostsList() {
     const [filterState, setFilterState] = useState<FilterState>({
         searchText: '',
         selectedCategories: [],
-        radius: userRadius || 0,
+        radius: userRadius || 15, // Changed default to 0 to indicate "show all"
         sortBy: 'newest'
     });
 

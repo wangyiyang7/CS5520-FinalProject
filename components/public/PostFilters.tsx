@@ -277,7 +277,7 @@ export function PostFilters({
                             <Slider
                                 style={styles.slider}
                                 minimumValue={0}  // Changed from 1 to 0
-                                maximumValue={20}
+                                maximumValue={25}
                                 step={1}
                                 value={tempFilterState.radius}
                                 onValueChange={handleRadiusChange}
@@ -287,7 +287,7 @@ export function PostFilters({
                             />
                             <View style={styles.sliderLabels}>
                                 <Text style={styles.sliderLabel}>All</Text>
-                                <Text style={styles.sliderLabel}>20km</Text>
+                                <Text style={styles.sliderLabel}>25km</Text>
                             </View>
 
                             {/* <Slider
