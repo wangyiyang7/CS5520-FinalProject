@@ -14,6 +14,40 @@ Local Buzz
 
 Stay instantly informed about what's happening right around you with Local Buzz! This hyperlocal community bulletin board app connects you with real-time events and incidents in your neighborhood. From traffic snarls and road closures to local festivals and community gatherings, Local Buzz keeps you in the loop. Share updates, photos, and alerts with your neighbors, fostering a stronger, more informed community. Our AI-powered categorization ensures you see the most relevant information quickly, and customizable notifications keep you informed without overwhelming you. Experience the power of real-time local connection – download Local Buzz today!
 
+# Iteration 3 Submission
+
+## Current Implementation Status
+
+Project is now ready to be published and run on real Android and IOS Device, by using the following command below
+
+To have the credentials shipped with the EAS build `eas secret:push --env-file .env`
+
+To Build Android APK through EAS Build eas `build -p android --profile preview`
+
+## Carlos Semeho Edorh's Contributions:
+
+### Work Updates for branch (minor-refactoring-and-setup-for-publishing) Carlos
+
+1. Minor refactoring
+2. Updated the Map View to automatically switch the provider based on the device in use.
+3. Prepared and setup the project to be publishable on real device.
+   
+
+|               App Installed on Android                |
+| :---------------------------------------------------: |
+| <img src="./screenshots/android-apk.png" width="250"> |
+
+
+## Yiyang Wang's Contributions:
+
+
+
+
+
+
+
+
+
 # Iteration 2 Submission
 
 ## Current Implementation Status
@@ -21,8 +55,7 @@ Stay instantly informed about what's happening right around you with Local Buzz!
 - Authentication - Successfully implemented and functioning as expected.
 - Camera - Fully operational.
 - Location - Successfully retrieves and processes user geographical coordinates and obtains corresponding location info (city name).
-- Notification - Local notification is properly configured and delivering alerts reliably
-- First External API - OpenWeatherMap API integration successfully implemented to retrieve weather information based on user's geographical coordinates.
+- Notification - Local notification is properly configured and delivering alerts reliably - First External API - OpenWeatherMap API integration successfully implemented to retrieve weather information based on user's geographical coordinates.
 - Second External API - Google Natural Language AI integration successfully implemented to categorize user-generated text content.
 
 ## Carlos Semeho Edorh's Contributions:

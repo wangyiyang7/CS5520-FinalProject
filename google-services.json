@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "616772412676",
+    "project_id": "csproject5520-3228e",
+    "storage_bucket": "csproject5520-3228e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:616772412676:android:d34f3d867a9581ca3cdc51",
+        "android_client_info": {
+          "package_name": "com.localbuzz.spring2025"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDLBh6YQgnAvDJNNyB07ItbRZYkG9YT44I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -330,18 +330,18 @@ export const notifyUsersAboutPost = async (
         notificationCount++;
       }
 
-      // if (distance <= preferences.radius) {
-      //   await createNotification({
-      //     userId: user.id,
-      //     type: 'post',
-      //     title: `New ${post.category} post nearby`,
-      //     content: `${post.title} - ${post.locationName}`,
-      //     relatedPostId: post.id,
-      //     location: post.location,
-      //     category: post.category
-      //   });
-      //   notificationCount++;
-      // }
+      if (distance <= preferences.radius) {
+        await createNotification({
+          userId: user.id,
+          type: 'post',
+          title: `New ${post.category} post nearby`,
+          content: `${post.title} - ${post.locationName}`,
+          relatedPostId: post.id,
+          location: post.location,
+          category: post.category,
+        });
+        notificationCount++;
+      }
     }
 
     return notificationCount;
@@ -389,13 +389,13 @@ export const sendPushNotification = async (
     // const responseData = await response.json();
     // console.log('Push notification sent, skipping receipt check in development');
 
-    // const responseData = await response.json();
-    // console.log('Push Notification Response:', responseData);
+    const responseData = await response.json();
+    console.log('Push Notification Response:', responseData);
 
-    // if (!responseData.data || !responseData.data.id) {
-    //   console.error('Failed to get a push ticket ID.');
-    //   return false;
-    // }
+    if (!responseData.data || !responseData.data.id) {
+      console.error('Failed to get a push ticket ID.');
+      return false;
+    }
 
     // // Step 2: Fetch Receipt After a Short Delay (Expo Needs Time to Process)
     // const receiptId = responseData.data.id;
