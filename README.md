@@ -16,7 +16,7 @@ Stay instantly informed about what's happening right around you with Local Buzz!
 
 ## App Demo Video
 
-https://vimeo.com/1075184379(https://vimeo.com/1075184379)
+https://vimeo.com/1075184379
 
 # Iteration 3 Submission
 
