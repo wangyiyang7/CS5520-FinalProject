@@ -28,7 +28,6 @@ export interface Notification {
     latitude: number;
     longitude: number;
   };
-  scheduledFor?: Date;
   createdAt: Date;
   isRead: boolean;
   category?: string;
@@ -79,7 +78,6 @@ export const getUserNotifications = async (
         content: processedData.content,
         relatedPostId: processedData.relatedPostId,
         location: processedData.location,
-        scheduledFor: processedData.scheduledFor,
         createdAt: processedData.createdAt,
         isRead: processedData.isRead || false,
         category: processedData.category,
@@ -202,7 +200,6 @@ export const scheduleNotification = async (
   userId: string,
   title: string,
   content: string,
-  scheduledFor: Date,
   category?: string,
   location?: { latitude: number; longitude: number }
 ): Promise<string | null> => {
@@ -212,7 +209,6 @@ export const scheduleNotification = async (
       type: 'local' as const,
       title,
       content,
-      scheduledFor,
       category,
       location,
     };
@@ -232,13 +228,12 @@ export const getScheduledNotifications = async (
     const whereConditions: QueryParams[] = [
       { fieldPath: 'userId', operator: '==', value: userId },
       { fieldPath: 'type', operator: '==', value: 'local' },
-      { fieldPath: 'scheduledFor', operator: '>=', value: new Date() },
     ];
 
     const results = await queryDocuments(
       COLLECTIONS.NOTIFICATIONS,
       whereConditions,
-      'scheduledFor',
+      'createdAt',
       'asc'
     );
 
@@ -253,7 +248,6 @@ export const getScheduledNotifications = async (
         content: processedData.content,
         relatedPostId: processedData.relatedPostId,
         location: processedData.location,
-        scheduledFor: processedData.scheduledFor,
         createdAt: processedData.createdAt,
         isRead: processedData.isRead || false,
         category: processedData.category,
@@ -420,180 +414,3 @@ export const sendPushNotification = async (
     return false;
   }
 };
-
-// export const sendPushNotification__ = async (
-//   pushToken: string,
-//   title: string,
-//   body: string,
-//   data?: Record<string, any>
-// ): Promise<boolean> => {
-//   try {
-//     const message = {
-//       to: pushToken,
-//       sound: 'default',
-//       title: title,
-//       body: body,
-//       data: data || {},
-//     };
-
-//     const response = await fetch('https://exp.host/--/api/v2/push/send', {
-//       method: 'POST',
-//       headers: {
-//         Accept: 'application/json',
-//         'Accept-encoding': 'gzip, deflate',
-//         'Content-Type': 'application/json',
-//       },
-//       body: JSON.stringify(message),
-//     });
-
-//     const responseData = await response.json();
-//     console.log('Push Notification Response:', responseData);
-//     return responseData.data && responseData.data.status === 'ok';
-//   } catch (error) {
-//     console.error('Error sending push notification:', error);
-//     return false;
-//   }
-// };
-
-// export const sendPushNotification_o = async (
-//   pushToken: string,
-//   title: string,
-//   body: string,
-//   data?: Record<string, any>
-// ): Promise<boolean> => {
-//   try {
-//     const message = {
-//       to: pushToken,
-//       sound: 'default',
-//       title: title,
-//       body: body,
-//       data: data || {},
-//     };
-
-//     const response = await fetch('https://exp.host/--/api/v2/push/send', {
-//       method: 'POST',
-//       headers: {
-//         Accept: 'application/json',
-//         'Accept-encoding': 'gzip, deflate',
-//         'Content-Type': 'application/json',
-//       },
-//       body: JSON.stringify(message),
-//     });
-
-//     const responseData = await response.json();
-//     console.log('Push Notification Response:', responseData);
-
-//     if (!responseData.data || !responseData.data.id) {
-//       console.error('Failed to get a push ticket ID.');
-//       return false;
-//     }
-
-//     // Step 2: Fetch Receipt After a Short Delay (Expo Needs Time to Process)
-//     const receiptId = responseData.data.id;
-//     await new Promise((resolve) => setTimeout(resolve, 3000)); // Wait 3 seconds
-
-//     const receiptResponse = await fetch(
-//       'https://exp.host/--/api/v2/push/getReceipts',
-//       {
-//         method: 'POST',
-//         headers: {
-//           Accept: 'application/json',
-//           'Content-Type': 'application/json',
-//         },
-//         body: JSON.stringify({ ids: [receiptId] }),
-//       }
-//     );
-
-//     const receiptData = await receiptResponse.json();
-//     console.log('Push Receipt Response:', JSON.stringify(receiptData, null, 2)); // More detailed logging
-
-//     if (receiptData.data && receiptData.data[receiptId]) {
-//       const status = receiptData.data[receiptId].status;
-//       console.log('Push notification receipt status:', status);
-//       if (status === 'ok') {
-//         console.log('Notification delivered successfully!');
-//         return true;
-//       } else {
-//         console.error(
-//           'Push notification error details:',
-//           receiptData.data[receiptId]
-//         );
-//       }
-//     } else {
-//       console.error('No receipt data found for ticket ID:', receiptId);
-//     }
-
-//     return false;
-//   } catch (error) {
-//     console.error('Error sending push notification:', error);
-//     return false;
-//   }
-// };
-
-// export const notifyUsersAboutPost__ = async (
-//   post: PublicPost
-// ): Promise<number> => {
-//   try {
-//     // Instead of querying for users with specific preferences
-//     // Get all users and filter client-side
-//     const allUsers = await queryDocuments(COLLECTIONS.USERS);
-
-//     let notificationCount = 0;
-
-//     // For each user, check if they have the relevant preferences
-//     for (const user of allUsers) {
-//       const preferences = user.notificationPreferences;
-
-//       // Skip users with no notification preferences
-//       if (!preferences || !preferences.categories || !preferences.radius)
-//         continue;
-
-//       // Skip users not interested in this category
-//       if (!preferences.categories.includes(post.category)) continue;
-
-//       // Get the user's last known location
-//       const userLocation = await getUserLastLocation(user.id);
-//       if (!userLocation) continue;
-
-//       // Calculate distance between post and user
-//       const distance = calculateDistance(
-//         userLocation.latitude,
-//         userLocation.longitude,
-//         post.location.latitude,
-//         post.location.longitude
-//       );
-
-//       // If post is within radius, create a notification
-//       if (distance <= preferences.radius) {
-//         await createNotification({
-//           userId: user.id,
-//           type: 'post',
-//           title: `New ${post.category} post nearby`,
-//           content: `${post.title} - ${post.locationName}`,
-//           relatedPostId: post.id,
-//           location: post.location,
-//           category: post.category,
-//         });
-
-//         console.log(`Notified user ${user.id} about post ${post.id}`);
-
-//         // Add push notification if user has a push token
-//         if (user.pushToken) {
-//           await sendPushNotification(
-//             user.pushToken,
-//             `New ${post.category} post nearby`,
-//             `${post.title} - ${post.locationName}`,
-//             { postId: post.id }
-//           );
-//         }
-
-//         notificationCount++;
-//       }
-//     }
-
-//     return notificationCount;
-//   } catch (error) {
-//     console.error('Error notifying users about post:', error);
-//     return 0;
-//   }
-// };

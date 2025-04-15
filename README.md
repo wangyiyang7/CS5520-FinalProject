@@ -14,9 +14,20 @@ Local Buzz
 
 Stay instantly informed about what's happening right around you with Local Buzz! This hyperlocal community bulletin board app connects you with real-time events and incidents in your neighborhood. From traffic snarls and road closures to local festivals and community gatherings, Local Buzz keeps you in the loop. Share updates, photos, and alerts with your neighbors, fostering a stronger, more informed community. Our AI-powered categorization ensures you see the most relevant information quickly, and customizable notifications keep you informed without overwhelming you. Experience the power of real-time local connection – download Local Buzz today!
 
+# Final presentation Suggestions Adjustment
+
+1. removed the initial `scheduledFor` field in the notification collection that was designed to store a future date and time when a notification should be delivered to the user. This was not implemented because as at the time the push notification was being tested out, it did not work as expected on the simulator so this was skipped as a result of not really being part of the project requirements to move on to other things. But in a way, it just serves as a timestamp that allows the app to create scheduled notifications for later delivery instead of immediately showing them.
+   
+2. Removed the CompactWeather Component Loading state UI which may be confusing to users as suggested by the instructor.
+
 ## App Demo Video
 
+`New After Presentation`
+https://youtu.be/EcokWdvMqjE
+
+`Old Before Presentation`
 https://vimeo.com/1075184379
+
 
 # Iteration 3 Submission
 
@@ -47,8 +58,8 @@ To Build Android APK through EAS Build eas `build -p android --profile preview`
 - [**Update stylings** ](https://github.com/wangyiyang7/CS5520-FinalProject/pull/33): Update stylings of a few screens.
 
 
-|               App Installed on Android                |
-| :---------------------------------------------------: |
+|              App Installed on Android              |
+| :------------------------------------------------: |
 | <img src="./screenshots/login-v2.png" width="250"> |
 
 

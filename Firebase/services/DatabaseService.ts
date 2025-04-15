@@ -44,7 +44,6 @@ export const DATABASE_STRUCTURE = {
       'content',
       'relatedPostId',
       'location',
-      'scheduledFor',
       'createdAt',
       'isRead',
       'category',
