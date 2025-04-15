@@ -23,10 +23,7 @@ interface Weather {
 export default function CompactWeather() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [weatherInfo, setWeather] = useState<Weather | null>(null);
-  const [weatherDesc, setWeatherDesc] = useState<WeatherDescription | null>(
-    null
-  );
-  const [loading, setLoading] = useState(true);
+  const [weatherDesc, setWeatherDesc] = useState<WeatherDescription | null>(null);
   const colorScheme = useColorScheme() ?? "light";
   const isDaytime = new Date().getHours() >= 6 && new Date().getHours() < 18;
   const [location, setLocation] = useState("unknown");
@@ -44,10 +41,8 @@ export default function CompactWeather() {
 
   useEffect(() => {
     async function getWeather() {
-      setLoading(true);
       try {
         const myLocation = await getCurrentLocation();
-        //console.log(myLocation);
         if (myLocation) {
           const { latitude, longitude } = myLocation.coords;
           const city = await Location.reverseGeocodeAsync({
@@ -76,7 +71,6 @@ export default function CompactWeather() {
           const precipitation = current.variables(1)!.value();
           const weatherCode = current.variables(2)!.value();
 
-          // Try to get min/max temperatures if available
           let minTemp, maxTemp;
           try {
             minTemp = daily.variables(1)!.valuesArray()![0];
@@ -101,12 +95,17 @@ export default function CompactWeather() {
       } catch (e) {
         console.error("Weather fetch error:", e);
         setErrorMsg("Could not fetch weather");
-      } finally {
-        setLoading(false);
       }
     }
 
     getWeather();
+
+    // Set up periodic refresh without showing loading state
+    const refreshInterval = setInterval(() => {
+      getWeather();
+    }, 300000); // Refresh every 5 minutes
+
+    return () => clearInterval(refreshInterval);
   }, []);
 
   // Format temperature range like "4°C - 3°C"
@@ -138,17 +137,6 @@ export default function CompactWeather() {
     return "";
   };
 
-  if (loading) {
-    return (
-      <ThemedView style={styles.container}>
-        <ActivityIndicator
-          size="small"
-          color={colorScheme === "light" ? Colors.light.tint : Colors.dark.tint}
-        />
-      </ThemedView>
-    );
-  }
-
   if (errorMsg) {
     return (
       <ThemedView style={styles.container}>
@@ -160,7 +148,12 @@ export default function CompactWeather() {
   if (!weatherInfo || !weatherDesc) {
     return (
       <ThemedView style={styles.container}>
-        <ThemedText>Weather data not available</ThemedText>
+        <Text>{location}</Text>
+        <View style={styles.weatherContent}>
+          <View style={styles.weatherIcon} />
+          <ThemedText style={styles.weatherText}>Weather updating...</ThemedText>
+        </View>
+        <ThemedText style={styles.temperatureText}>--°C</ThemedText>
       </ThemedView>
     );
   }
